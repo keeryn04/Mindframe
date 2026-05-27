@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import { AppEvent } from "../types/AppEvent";
-import { initialState, UserState } from "../types/UserState";
+import { AppEvent } from "../types/AppEvent.types";
+import { initialState, UserState } from "../types/UserState.types";
 import { handleEvent } from "../components/recommendations/handleEvent";
-import { EngineResult, RuleTrace, StateDelta } from "../types/RuleTypes";
+import { EngineResult, RuleTrace, StateDelta } from "../types/RuleTypes.types";
 import { getRecommendations } from "../components/recommendations/recEngine";
-import { Recommendation } from "../types/recommendations/Recommendation";
+import { Recommendation } from "../types/recommendations/Recommendation.types";
 
 interface UserStateStore {
   state: UserState;

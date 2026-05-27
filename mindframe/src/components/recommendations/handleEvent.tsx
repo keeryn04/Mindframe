@@ -1,9 +1,9 @@
-import { AppEvent } from "../../types/AppEvent";
-import { EngineResult } from "../../types/RuleTypes";
-import { UserState } from "../../types/UserState";
+import { AppEvent } from "../../types/AppEvent.types";
+import { EngineResult } from "../../types/RuleTypes.types";
+import { UserState } from "../../types/UserState.types";
 import { runEngine } from "./ruleEngine";
-import { taskRules } from "../../types/TaskRules";
-import { modifiers } from "../../types/Modifiers";
+import { taskRules } from "../../types/TaskRules.types";
+import { modifiers } from "../../types/Modifiers.types";
 
 /**
  * Primary entry point. Takes an event and current state,

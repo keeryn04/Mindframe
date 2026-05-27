@@ -1,7 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { useUserStateStore } from './src/store/useUserStateStore';
-import { Recommendation, RecommendationCategory } from './src/types/recommendations/Recommendation';
+import { Recommendation, RecommendationCategory } from './src/types/recommendations/Recommendation.types';
+import { CalendarScreen } from './src/screens/CalendarScreen';
  
 const TASK = {
   easy:   { id: '1', cognitiveLoad: 2,  durationMinutes: 15, difficulty: 'low'    as const, isRepeat: false },
@@ -68,33 +69,9 @@ export default function App() {
         ? <Text style={styles.empty}>No recommendations right now.</Text>
         : recommendations.map(r => <RecommendationCard key={r.id} rec={r} />)
       }
+
+      <CalendarScreen />
  
-      <Text style={styles.heading}>Events</Text>
-      <Text style={styles.subheading}>Complete</Text>
-      <View style={styles.btnRow}>
-        {(['easy', 'medium', 'hard'] as const).map(d => (
-          <TouchableOpacity key={d} style={styles.btn}
-            onPress={() => dispatch({ type: 'TASK_COMPLETED', task: TASK[d] })}>
-            <Text style={styles.btnText}>{d.charAt(0).toUpperCase() + d.slice(1)}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
- 
-      <Text style={styles.subheading}>Fail</Text>
-      <View style={styles.btnRow}>
-        {(['easy', 'medium', 'hard'] as const).map(d => (
-          <TouchableOpacity key={d} style={[styles.btn, styles.btnDanger]}
-            onPress={() => dispatch({ type: 'TASK_FAILED', task: TASK[d] })}>
-            <Text style={[styles.btnText, { color: '#fff' }]}>{d.charAt(0).toUpperCase() + d.slice(1)}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
- 
-      <View style={[styles.btnRow, { marginTop: 8 }]}>
-        <TouchableOpacity style={styles.btn}
-          onPress={() => dispatch({ type: 'TASK_INTERRUPTED', task: TASK.medium })}>
-          <Text style={styles.btnText}>Interrupt</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={styles.btn}
           onPress={() => dispatch({ type: 'BREAK_TAKEN', durationMinutes: 15 })}>
           <Text style={styles.btnText}>Break 15m</Text>
@@ -103,7 +80,6 @@ export default function App() {
           onPress={() => dispatch({ type: 'SESSION_STARTED' })}>
           <Text style={styles.btnText}>Start session</Text>
         </TouchableOpacity>
-      </View>
     </ScrollView>
   );
 }

@@ -1,5 +1,5 @@
-import { StateRule } from "../types/RuleTypes";
-import { AppEvent } from "../types/AppEvent";
+import { StateRule } from "./RuleTypes.types";
+import { AppEvent } from "./AppEvent.types";
  
 /**
  * Completing a task relieves stress proportional to cognitive load.
@@ -128,6 +128,48 @@ const taskInterruptedPenalty: StateRule = {
   matches: (e) => e.type === "TASK_INTERRUPTED",
   apply: () => ({ stressLevel: 5, focusLevel: -15, momentum: -8 }),
 };
+
+const taskCreatedImpact: StateRule = {
+  name: "task-created-impact",
+  description: "Creating a task adds light cognitive load but builds intent",
+  matches: (e) => e.type === "TASK_CREATED",
+  apply: (e) => {
+    const { task } = e as Extract<AppEvent, { type: "TASK_CREATED" }>;
+    return {
+      stressLevel: task.cognitiveLoad * 0.2,
+      focusLevel: 2,
+      momentum: 3,
+    };
+  },
+};
+
+const taskUpdatedClarity: StateRule = {
+  name: "task-updated-clarity",
+  description: "Updating a task reduces ambiguity and improves focus",
+  matches: (e) => e.type === "TASK_UPDATED",
+  apply: () => ({
+    stressLevel: -2,
+    focusLevel: 4,
+  }),
+};
+
+const taskDeletedEffect: StateRule = {
+  name: "task-deleted-effect",
+  description: "Deleting tasks relieves stress or causes mild guilt depending on difficulty",
+  matches: (e) => e.type === "TASK_DELETED",
+  apply: (e) => {
+    const { task } = e as Extract<AppEvent, { type: "TASK_DELETED" }>;
+
+    if (task.difficulty === "high") {
+      return { stressLevel: -8, momentum: -2 };
+    }
+    if (task.difficulty === "medium") {
+      return { stressLevel: -4 };
+    }
+
+    return { stressLevel: 2, confidence: -1 }; //low task = slight guilt
+  },
+};
  
 /**
  * Taking a break restores energy and reduces stress.
@@ -178,4 +220,8 @@ export const taskRules: StateRule[] = [
   breakTakenRecovery,
   sessionStartedPrime,
   sessionEndedRelief,
+  taskCreatedImpact,
+  taskUpdatedClarity,
+  taskDeletedEffect,
+
 ];

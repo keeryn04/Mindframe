@@ -1,5 +1,5 @@
-import { UserState } from "../UserState";
-import { Recommendation } from "./Recommendation";
+import { UserState } from "../UserState.types";
+import { Recommendation } from "./Recommendation.types";
 
 /**
  * A RecommendationRule checks the current state and returns a

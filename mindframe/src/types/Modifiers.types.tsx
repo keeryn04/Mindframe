@@ -1,4 +1,4 @@
-import { RuleModifier } from "./RuleTypes";
+import { RuleModifier } from "./RuleTypes.types";
  
 /**
  * When the user is exhausted (energy < 20), all negative effects

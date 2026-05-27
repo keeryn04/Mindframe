@@ -1,5 +1,5 @@
-import { AppEvent } from "./AppEvent";
-import { UserState } from "./UserState";
+import { AppEvent } from "./AppEvent.types";
+import { UserState } from "./UserState.types";
  
 /**
  * A delta is a partial state where each field is a *signed change*,

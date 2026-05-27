@@ -1,6 +1,6 @@
-import { RecommendationRule, recommendationRules } from "../../types/recommendations/RecommendationRule";
-import { Recommendation, RecommendationPriority } from "../../types/recommendations/Recommendation";
-import { UserState } from "../../types/UserState";
+import { RecommendationRule, recommendationRules } from "../../types/recommendations/RecommendationRule.types";
+import { Recommendation, RecommendationPriority } from "../../types/recommendations/Recommendation.types";
+import { UserState } from "../../types/UserState.types";
  
 const PRIORITY_ORDER: Record<RecommendationPriority, number> = {
   urgent: 0,
