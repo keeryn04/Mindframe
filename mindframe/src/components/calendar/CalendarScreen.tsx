@@ -12,11 +12,11 @@ import {
   CalendarProvider,
   ExpandableCalendar,
 } from 'react-native-calendars';
-import { useCalendarStore } from '../store/useCalendarStore';
-import { getTasksForDay } from '../utils/calendarUtils';
-import { ScheduledTask } from '../types/Task.types';
-import { TaskFormModal } from '../components/calendar/TaskFormModal';
-import { TaskDetailModal } from '../components/calendar/TaskDetailModal';
+import { useCalendarStore } from '../../store/useCalendarStore';
+import { getTasksForDay } from '../../utils/calendarUtils';
+import { ScheduledTask } from '../../types/Task.types';
+import { TaskFormModal } from './TaskFormModal';
+import { TaskDetailModal } from './TaskDetailModal';
 
 export function CalendarScreen() {
   const [formOpen, setFormOpen] = useState(false);
@@ -50,7 +50,6 @@ export function CalendarScreen() {
   const dailyTasks = getTasksForDay(tasks, selectedDate);
 
   return (
-    <SafeAreaView style={styles.safe}>
       <CalendarProvider
         date={selectedDate}
         onDateChanged={(date) => setSelectedDate(date)}
@@ -152,7 +151,6 @@ export function CalendarScreen() {
           }}
         />
       </CalendarProvider>
-    </SafeAreaView>
   );
 }
 
