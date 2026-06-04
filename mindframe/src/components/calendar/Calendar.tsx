@@ -18,7 +18,7 @@ import { ScheduledTask } from '../../types/Task.types';
 import { TaskFormModal } from './TaskFormModal';
 import { TaskDetailModal } from './TaskDetailModal';
 
-export function CalendarScreen() {
+export function Calendar() {
   const [formOpen, setFormOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<ScheduledTask | null>(null);
@@ -65,11 +65,9 @@ export function CalendarScreen() {
           }}
         />
 
-        
         <TouchableOpacity style={styles.addBtn} onPress={openCreate}>
           <Text style={styles.addBtnText}>+ Add Task</Text>
         </TouchableOpacity>
-
 
         <FlatList
           data={dailyTasks}

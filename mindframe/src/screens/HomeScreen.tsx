@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import { useUserStateStore } from "../store/useUserStateStore";
 import { Recommendation, RecommendationCategory } from "../types/recommendations/Recommendation.types";
-import { CalendarScreen } from "../components/calendar/CalendarScreen";
+import { Calendar } from "../components/calendar/Calendar";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 
@@ -95,7 +95,7 @@ export function HomeScreen() {
       <Header />
       {topRec && <RecommendationBanner rec={topRec} />}
       <View style={styles.calendar}>
-        <CalendarScreen />
+        <Calendar />
       </View>
     </SafeAreaView>
   );
