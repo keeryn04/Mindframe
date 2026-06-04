@@ -12,7 +12,7 @@ import {
   CalendarProvider,
   ExpandableCalendar,
 } from 'react-native-calendars';
-import { useCalendarStore } from '../../store/useCalendarStore';
+import { useTaskStore } from '../../store/useTaskStore';
 import { getTasksForDay } from '../../utils/calendarUtils';
 import { ScheduledTask } from '../../types/Task.types';
 import { TaskFormModal } from './TaskFormModal';
@@ -40,11 +40,10 @@ export function Calendar() {
     setSelectedDate,
     addTask,
     updateTask,
-    removeTask,
     completeTask,
     delayTask,
     skipTask,
-  } = useCalendarStore();
+  } = useTaskStore();
 
   const markedDates = getMarkedDates(tasks, selectedDate);
   const dailyTasks = getTasksForDay(tasks, selectedDate);
