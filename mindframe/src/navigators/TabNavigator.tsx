@@ -1,6 +1,7 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { HomeScreen } from "../screens/HomeScreen";
+import { ProfileScreen } from "../screens/ProfileScreen";
 import { ROUTES } from "./routes";
 import { useUserStateStore } from "../store/useUserStateStore";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,7 +10,7 @@ export type TabParamList = {
   [ROUTES.HOME]: undefined;
   [ROUTES.TASKS]: undefined;
   [ROUTES.STATS]: undefined;
-  [ROUTES.SETTINGS]: undefined;
+  [ROUTES.PROFILE]: undefined;
 };
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -20,7 +21,7 @@ const TAB_ICONS: Record<keyof TabParamList, { focused: IoniconName; default: Ion
   [ROUTES.HOME]:     { focused: "home",          default: "home-outline" },
   [ROUTES.TASKS]:    { focused: "checkmark-done", default: "checkmark-done-outline" },
   [ROUTES.STATS]:    { focused: "bar-chart",      default: "bar-chart-outline" },
-  [ROUTES.SETTINGS]: { focused: "settings",       default: "settings-outline" },
+  [ROUTES.PROFILE]: { focused: "person",       default: "person-outline" },
 };
 
 export function TabNavigator() {
@@ -41,6 +42,13 @@ export function TabNavigator() {
       <Tab.Screen
         name={ROUTES.HOME}
         component={HomeScreen}
+        options={{
+          tabBarBadge: urgentCount > 0 ? urgentCount : undefined,
+        }}
+      />
+      <Tab.Screen
+        name={ROUTES.PROFILE}
+        component={ProfileScreen}
         options={{
           tabBarBadge: urgentCount > 0 ? urgentCount : undefined,
         }}

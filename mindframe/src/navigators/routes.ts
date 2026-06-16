@@ -7,5 +7,5 @@ export const ROUTES = {
   HOME:     "Home",
   TASKS:    "Tasks",
   STATS:    "Stats",
-  SETTINGS: "Settings",
+  PROFILE:  "Profile",
 } as const;
