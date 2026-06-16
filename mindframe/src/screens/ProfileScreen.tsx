@@ -5,6 +5,8 @@ import {
   TextInput,
   Pressable,
   StyleSheet,
+  Animated,
+  Easing,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useUserPreferencesStore } from "../store/useUserPreferencesStore";
@@ -34,11 +36,55 @@ export function ProfileScreen() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+  const toastTranslateY = useRef(new Animated.Value(20)).current;
   const [localName, setLocalName] = useState(preferences.displayName);
 
   useEffect(() => {
     setLocalName(preferences.displayName);
   }, [isHydrated]);
+
+  useEffect(() => {
+    if (saveStatus === "idle") return;
+
+    // Animate IN
+    Animated.parallel([
+        Animated.timing(toastOpacity, {
+        toValue: 1,
+        duration: 200,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+        }),
+        Animated.timing(toastTranslateY, {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+        }),
+    ]).start();
+
+    // Animate OUT when going idle
+    if (saveStatus === "saved") {
+        const timeout = setTimeout(() => {
+        Animated.parallel([
+            Animated.timing(toastOpacity, {
+            toValue: 0,
+            duration: 250,
+            easing: Easing.in(Easing.ease),
+            useNativeDriver: true,
+            }),
+            Animated.timing(toastTranslateY, {
+            toValue: 20,
+            duration: 250,
+            easing: Easing.in(Easing.ease),
+            useNativeDriver: true,
+            }),
+        ]).start();
+        }, SAVED_DISPLAY_MS - 200); // fade slightly before disappearing
+
+        return () => clearTimeout(timeout);
+    }
+  }, [saveStatus]);
 
   const handleChange = useCallback(
     (patch: Partial<UserPreferences>) => {
@@ -128,16 +174,6 @@ export function ProfileScreen() {
         </View>
       </View>
 
-      {/* Save status */}
-      <View style={styles.saveStatus}>
-        {saveStatus === "saving" && (
-          <Text style={{ color: "#888" }}>Saving…</Text>
-        )}
-        {saveStatus === "saved" && (
-          <Text style={{ color: "#22c55e" }}>Saved</Text>
-        )}
-      </View>
-
       {/* Preferences form */}
       <View style={styles.content}>
         <PreferencesForm
@@ -145,6 +181,29 @@ export function ProfileScreen() {
           onChange={handleChange}
         />
       </View>
+
+        <Animated.View
+            pointerEvents="none"
+            style={[
+                styles.toastContainer,
+                {
+                opacity: toastOpacity,
+                transform: [{ translateY: toastTranslateY }],
+                },
+            ]}
+            >
+            <View style={styles.toast}>
+                <Text
+                style={[
+                    styles.toastText,
+                    saveStatus === "saving" && { color: "#ccc" },
+                    saveStatus === "saved" && { color: "#22c55e" },
+                ]}
+                >
+                {saveStatus === "saving" ? "Saving…" : "Saved"}
+                </Text>
+            </View>
+        </Animated.View>
     </View>
     </SafeAreaView>
   );
@@ -198,7 +257,7 @@ const styles = StyleSheet.create({
   },
   colorSwatch: {
     width: 32,
-    height: 32,
+    height: 16,
     borderRadius: 16,
   },
   colorSelected: {
@@ -207,6 +266,29 @@ const styles = StyleSheet.create({
   },
   saveStatus: {
     minHeight: 20,
+  },
+  toastContainer: {
+    position: "absolute",
+    bottom: 30,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    pointerEvents: "none", // lets touches pass through
+  },
+  toast: {
+    backgroundColor: "#111",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+    toastText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "500",
   },
   content: {
     flex: 1,

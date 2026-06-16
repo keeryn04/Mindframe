@@ -23,13 +23,10 @@ export const useUserPreferencesStore = create<UserPreferencesStore>((set, get) =
 
   updatePreferences: async (patch) => {
     const merged: UserPreferences = { ...get().preferences, ...patch };
-    console.log("Updating preferences with patch:", patch, "Merged result:", merged);
     set({ preferences: merged });
-    console.log("Preferences after set:", get().preferences);
 
     if (repoRef) {
       await repoRef.save(merged);
-      console.log("Preferences saved to repo:", merged);
     }
   },
 }));

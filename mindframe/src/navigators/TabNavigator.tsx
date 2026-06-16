@@ -42,16 +42,13 @@ export function TabNavigator() {
       <Tab.Screen
         name={ROUTES.HOME}
         component={HomeScreen}
-        options={{
-          tabBarBadge: urgentCount > 0 ? urgentCount : undefined,
-        }}
+        // options={{
+        //   tabBarBadge: urgentCount > 0 ? urgentCount : undefined,
+        // }}
       />
       <Tab.Screen
         name={ROUTES.PROFILE}
         component={ProfileScreen}
-        options={{
-          tabBarBadge: urgentCount > 0 ? urgentCount : undefined,
-        }}
       />
     </Tab.Navigator>
   );
