@@ -12,13 +12,13 @@ import {
   CalendarProvider,
   ExpandableCalendar,
 } from 'react-native-calendars';
-import { useCalendarStore } from '../store/useCalendarStore';
-import { getTasksForDay } from '../utils/calendarUtils';
-import { ScheduledTask } from '../types/Task.types';
-import { TaskFormModal } from '../components/calendar/TaskFormModal';
-import { TaskDetailModal } from '../components/calendar/TaskDetailModal';
+import { useTaskStore } from '../../store/useTaskStore';
+import { getTasksForDay } from '../../utils/calendarUtils';
+import { ScheduledTask } from '../../types/Task.types';
+import { TaskFormModal } from './TaskFormModal';
+import { TaskDetailModal } from './TaskDetailModal';
 
-export function CalendarScreen() {
+export function Calendar() {
   const [formOpen, setFormOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<ScheduledTask | null>(null);
@@ -40,17 +40,15 @@ export function CalendarScreen() {
     setSelectedDate,
     addTask,
     updateTask,
-    removeTask,
     completeTask,
     delayTask,
     skipTask,
-  } = useCalendarStore();
+  } = useTaskStore();
 
   const markedDates = getMarkedDates(tasks, selectedDate);
   const dailyTasks = getTasksForDay(tasks, selectedDate);
 
   return (
-    <SafeAreaView style={styles.safe}>
       <CalendarProvider
         date={selectedDate}
         onDateChanged={(date) => setSelectedDate(date)}
@@ -66,11 +64,9 @@ export function CalendarScreen() {
           }}
         />
 
-        
         <TouchableOpacity style={styles.addBtn} onPress={openCreate}>
           <Text style={styles.addBtnText}>+ Add Task</Text>
         </TouchableOpacity>
-
 
         <FlatList
           data={dailyTasks}
@@ -152,7 +148,6 @@ export function CalendarScreen() {
           }}
         />
       </CalendarProvider>
-    </SafeAreaView>
   );
 }
 
