@@ -51,7 +51,7 @@ function extractDate(dateTime: string): string {
   return dateTime.split('T')[0];
 }
 
-/** Build ISO datetime from date string + "HH:MM" time string */
+/** BuildLocal datetime from date string + "HH:MM" time string */
 function buildDateTime(date: string, time: string): string {
   return `${date}T${time}:00`;
 }
