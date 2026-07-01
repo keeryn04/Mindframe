@@ -3,6 +3,7 @@ export const ROUTES = {
   LOADING:  "Loading",
   ERROR:    "Error",
   MAIN:     "Main",
+  BREAKS:   "Breaks",
   // Tabs
   HOME:     "Home",
   TASKS:    "Tasks",

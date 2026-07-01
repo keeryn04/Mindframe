@@ -14,5 +14,6 @@ export interface Recommendation {
   headline: string;         //short sentence - shown in list
   detail: string;           //full sentence - shown expanded
   action?: string;          //optional CTA label e.g. "Take a break"
-  actionEvent?: string;     //event type to dispatch when CTA tapped
+  actionEvent?: string;     //event type to dispatch directly when CTA tapped
+  actionRoute?: string;     //route name to navigate to instead, when the CTA needs more input (e.g. "Breaks")
 }

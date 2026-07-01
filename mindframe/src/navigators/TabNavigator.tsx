@@ -8,15 +8,15 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-
+import { BreaksScreen }   from "../screens/BreaksScreen";
 import { HomeScreen }    from "../screens/HomeScreen";
 import { StatsScreen }   from "../screens/StatsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { ROUTES }        from "./routes";
 
 export type TabParamList = {
+  [ROUTES.BREAKS]:   undefined;
   [ROUTES.HOME]:    undefined;
-  [ROUTES.TASKS]:   undefined;
   [ROUTES.STATS]:   undefined;
   [ROUTES.PROFILE]: undefined;
 };
@@ -26,8 +26,8 @@ const Tab = createBottomTabNavigator<TabParamList>();
 type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
 
 const TAB_ICONS: Record<keyof TabParamList, { focused: IoniconName; default: IoniconName }> = {
+  [ROUTES.BREAKS]:   { focused: "pause",         default: "pause-outline" },
   [ROUTES.HOME]:    { focused: "home",          default: "home-outline" },
-  [ROUTES.TASKS]:   { focused: "checkmark-done", default: "checkmark-done-outline" },
   [ROUTES.STATS]:   { focused: "bar-chart",      default: "bar-chart-outline" },
   [ROUTES.PROFILE]: { focused: "person",         default: "person-outline" },
 };
@@ -44,6 +44,7 @@ export function TabNavigator() {
         },
       })}
     >
+      <Tab.Screen name={ROUTES.BREAKS}   component={BreaksScreen} />
       <Tab.Screen name={ROUTES.HOME}    component={HomeScreen} />
       <Tab.Screen name={ROUTES.STATS}   component={StatsScreen} />
       <Tab.Screen name={ROUTES.PROFILE} component={ProfileScreen} />

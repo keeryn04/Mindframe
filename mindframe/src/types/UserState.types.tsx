@@ -13,3 +13,17 @@ export const initialState: UserState = {
   momentum: 50,
   confidence: 50,
 };
+
+/**
+ * Shared thresholds for "the user needs to step away" type checks.
+ * These power both the recommendation rules (criticalEnergy,
+ * highStressCritical, etc.) and the BreakPromptModal trigger condition.
+ * Keeping a single source of truth means the popup and the
+ * recommendation cards can never silently disagree on the cutoffs.
+ */
+export const THRESHOLDS = {
+  criticalEnergy: 15,
+  lowEnergy: 35,
+  highStressCritical: 85,
+  elevatedStress: 65,
+} as const;

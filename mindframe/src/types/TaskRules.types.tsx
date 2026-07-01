@@ -174,6 +174,9 @@ const taskDeletedEffect: StateRule = {
 /**
  * Taking a break restores energy and reduces stress.
  * Longer breaks restore more (logarithmic, not linear).
+ * This is the universal baseline — it fires for every BREAK_TAKEN
+ * event regardless of activityType, including legacy callers that
+ * only supply durationMinutes.
  */
 const breakTakenRecovery: StateRule = {
   name: "break-taken-recovery",
@@ -184,6 +187,49 @@ const breakTakenRecovery: StateRule = {
     const recovery = Math.log2(durationMinutes + 1) * 8;
     return { energyLevel: recovery, stressLevel: -recovery * 0.6 };
   },
+};
+
+/**
+ * Breathing exercises lean into calming — extra stress relief and
+ * a small focus bump, on top of the baseline recovery above.
+ */
+const breakBreathingCalm: StateRule = {
+  name: "break-breathing-calm",
+  description: "Breathing exercises cut stress further and sharpen focus",
+  matches: (e) => e.type === "BREAK_TAKEN" && e.activityType === "breathing",
+  apply: () => ({ stressLevel: -6, focusLevel: 4 }),
+};
+
+/**
+ * Movement breaks lean into energy and momentum rather than
+ * pure stress relief.
+ */
+const breakMovementEnergy: StateRule = {
+  name: "break-movement-energy",
+  description: "Movement restores energy and momentum more than passive rest",
+  matches: (e) => e.type === "BREAK_TAKEN" && e.activityType === "movement",
+  apply: () => ({ energyLevel: 6, momentum: 4 }),
+};
+
+/**
+ * Mindfulness breaks lower stress further and steady confidence.
+ */
+const breakMindfulnessClarity: StateRule = {
+  name: "break-mindfulness-clarity",
+  description: "Mindfulness lowers stress and steadies confidence",
+  matches: (e) => e.type === "BREAK_TAKEN" && e.activityType === "mindfulness",
+  apply: () => ({ stressLevel: -5, confidence: 3 }),
+};
+
+/**
+ * Social breaks lift momentum and confidence — a morale boost
+ * rather than pure physiological recovery.
+ */
+const breakSocialMomentum: StateRule = {
+  name: "break-social-momentum",
+  description: "Social check-ins lift momentum and confidence",
+  matches: (e) => e.type === "BREAK_TAKEN" && e.activityType === "social",
+  apply: () => ({ momentum: 5, confidence: 3 }),
 };
  
 /**
@@ -218,10 +264,13 @@ export const taskRules: StateRule[] = [
   taskFailedConfidenceDrop,
   taskInterruptedPenalty,
   breakTakenRecovery,
+  breakBreathingCalm,
+  breakMovementEnergy,
+  breakMindfulnessClarity,
+  breakSocialMomentum,
   sessionStartedPrime,
   sessionEndedRelief,
   taskCreatedImpact,
   taskUpdatedClarity,
   taskDeletedEffect,
-
 ];
