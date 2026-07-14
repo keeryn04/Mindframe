@@ -40,9 +40,11 @@ function taskOccursOnDay(task: ScheduledTask, date: Date): boolean {
 }
 
 export function getTasksForDay(tasks: ScheduledTask[], date: string) {
-  return tasks.filter(
-    (t) => t.startDateTime.split('T')[0] === date
-  );
+
+  return tasks.filter((t) => {
+    const taskDate = t.startDateTime.split("T")[0];
+    return taskDate === date;
+  });
 }
 
 export function getTasksForWeek(tasks: ScheduledTask[], weekDate: Date): ScheduledTask[] {
@@ -181,5 +183,6 @@ export function addWeeks(date: Date, delta: number): Date {
 }
 
 export function parseDateString(s: string): Date {
-  return new Date(s);
+  const [year, month, day] = s.split("-").map(Number);
+  return new Date(year, month - 1, day);
 }
