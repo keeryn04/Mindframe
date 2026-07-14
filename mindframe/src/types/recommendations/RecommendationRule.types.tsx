@@ -1,4 +1,5 @@
 import { UserState } from "../UserState.types";
+import { THRESHOLDS } from "../UserState.types";
 import { Recommendation } from "./Recommendation.types";
 
 /**
@@ -15,21 +16,21 @@ export type RecommendationRule = {
 
 const criticalEnergy: RecommendationRule = {
   id: "critical-energy",
-  condition: s => s.energyLevel < 15,
+  condition: s => s.energyLevel < THRESHOLDS.criticalEnergy,
   build: s => ({
     id: "critical-energy",
     category: "recovery",
     priority: "urgent",
     headline: "You're running on empty",
     detail: `Your energy is low — continuing now risks mistakes and a much longer recovery. Step away for at least 20 minutes.`,
-    action: "Log a break",
-    actionEvent: "BREAK_TAKEN",
+    action: "Take a break",
+    actionRoute: "Breaks",
   }),
 };
 
 const lowEnergy: RecommendationRule = {
   id: "low-energy",
-  condition: s => s.energyLevel >= 15 && s.energyLevel < 35,
+  condition: s => s.energyLevel >= THRESHOLDS.criticalEnergy && s.energyLevel < THRESHOLDS.lowEnergy,
   build: s => ({
     id: "low-energy",
     category: "recovery",
@@ -37,13 +38,13 @@ const lowEnergy: RecommendationRule = {
     headline: "Energy getting low",
     detail: `You're at a low energy level. A short break now will cost you 10 minutes but save you an hour of degraded focus later.`,
     action: "Take a break",
-    actionEvent: "BREAK_TAKEN",
+    actionRoute: "Breaks",
   }),
 };
 
 const highStressCritical: RecommendationRule = {
   id: "high-stress-critical",
-  condition: s => s.stressLevel > 85,
+  condition: s => s.stressLevel > THRESHOLDS.highStressCritical,
   build: s => ({
     id: "high-stress-critical",
     category: "warning",
@@ -51,13 +52,13 @@ const highStressCritical: RecommendationRule = {
     headline: "Stress is at a critical level",
     detail: `You're very stressed at the moment, your decision quality and retention drop significantly. Completing more tasks right now will likely cost you more than stopping.`,
     action: "Take a break",
-    actionEvent: "BREAK_TAKEN",
+    actionRoute: "Breaks",
   }),
 };
 
 const elevatedStress: RecommendationRule = {
   id: "elevated-stress",
-  condition: s => s.stressLevel >= 65 && s.stressLevel <= 85,
+  condition: s => s.stressLevel >= THRESHOLDS.elevatedStress && s.stressLevel <= THRESHOLDS.highStressCritical,
   build: s => ({
     id: "elevated-stress",
     category: "warning",

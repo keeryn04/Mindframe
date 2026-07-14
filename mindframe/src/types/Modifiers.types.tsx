@@ -76,13 +76,14 @@ const highConfidenceResilience: RuleModifier = {
  
 /**
  * Well-rested users (high energy) get more out of break recovery.
- * They snap back faster.
+ * They snap back faster. Also applies to the movement-specific
+ * bonus, since a walk benefits the same way a generic break does.
  */
 const wellRestedRecovery: RuleModifier = {
   name: "well-rested-recovery",
   description: "Well-rested users recover more efficiently from breaks",
   condition: (s) => s.energyLevel > 70,
-  affects: ["break-taken-recovery"],
+  affects: ["break-taken-recovery", "break-movement-energy"],
   multiplier: 0.8,
 };
  
