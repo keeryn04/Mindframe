@@ -254,10 +254,10 @@ export function HomeScreen() {
     <SafeAreaView style={styles.safe}>
       <Header />
       {topRec && <RecommendationBanner rec={topRec} />}
-      <BreakCallout emphasis={emphasis} onPress={openModal} />
       <View style={styles.calendar}>
         <Calendar />
       </View>
+      <BreakCallout emphasis={emphasis} onPress={openModal} />
 
       <Modal visible={modalVisible} animationType="slide" onRequestClose={closeModal}>
         <BreakModalContent onClose={closeModal} />

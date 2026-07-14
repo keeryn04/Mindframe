@@ -6,28 +6,28 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
 } from 'react-native';
 import { ScheduledTask } from '../../types/Task.types';
 import { TaskPriority, TaskStatus } from '../../types/calendar/Calendar.types';
-import { formatDateString } from '../../utils/calendarUtils';
+import { colors } from '../../styling/theme';
+import { styles } from '../../styling/TaskFormModal.styles';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PRIORITY_OPTIONS: TaskPriority[] = ['low', 'medium', 'high'];
 
 const COLOR_OPTIONS = [
-  '#534AB7', // purple
-  '#0F6E56', // teal
-  '#D85A30', // coral
-  '#185FA5', // blue
-  '#854F0B', // amber
-  '#993556', // pink
-  '#3B6D11', // green
-  '#A32D2D', // red
+  colors.brand,
+  colors.energy,
+  '#D85A30',
+  '#185FA5',
+  colors.momentum,
+  colors.confidence,
+  '#3B6D11',
+  colors.stress,
 ];
 
 const DEFAULT_STATUS: TaskStatus = 'in_progress';
@@ -228,7 +228,7 @@ export function TaskFormModal({
                 value={form.title}
                 onChangeText={(v) => set('title', v)}
                 placeholder="What needs to get done?"
-                placeholderTextColor="#B4B2A9"
+                placeholderTextColor={colors.inkFaint}
                 returnKeyType="next"
                 autoFocus={!isEdit}
               />
@@ -241,7 +241,7 @@ export function TaskFormModal({
                 value={form.date}
                 onChangeText={(v) => set('date', v)}
                 placeholder="YYYY-MM-DD"
-                placeholderTextColor="#B4B2A9"
+                placeholderTextColor={colors.inkFaint}
                 keyboardType="numbers-and-punctuation"
               />
             </Field>
@@ -255,7 +255,7 @@ export function TaskFormModal({
                     value={form.startTime}
                     onChangeText={(v) => set('startTime', v)}
                     placeholder="09:00"
-                    placeholderTextColor="#B4B2A9"
+                    placeholderTextColor={colors.inkFaint}
                     keyboardType="numbers-and-punctuation"
                   />
                 </Field>
@@ -268,7 +268,7 @@ export function TaskFormModal({
                     value={form.endTime}
                     onChangeText={(v) => set('endTime', v)}
                     placeholder="10:00"
-                    placeholderTextColor="#B4B2A9"
+                    placeholderTextColor={colors.inkFaint}
                     keyboardType="numbers-and-punctuation"
                   />
                 </Field>
@@ -334,7 +334,7 @@ export function TaskFormModal({
                   value={form.newSubtask}
                   onChangeText={(v) => set('newSubtask', v)}
                   placeholder="Add a subtask…"
-                  placeholderTextColor="#B4B2A9"
+                  placeholderTextColor={colors.inkFaint}
                   onSubmitEditing={addSubtask}
                   returnKeyType="done"
                   blurOnSubmit={false}
@@ -371,159 +371,4 @@ function Field({
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const HIT_SLOP = { top: 12, bottom: 12, left: 12, right: 12 };
-
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 0.5,
-    borderColor: '#E0E0E0',
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2C2C2A',
-  },
-  cancel: {
-    fontSize: 16,
-    color: '#888780',
-  },
-  save: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#534AB7',
-  },
-  body: {
-    padding: 20,
-    paddingBottom: 48,
-  },
-  field: {
-    marginBottom: 20,
-  },
-  fieldLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#888780',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    marginBottom: 8,
-  },
-  fieldError: {
-    fontSize: 12,
-    color: '#A32D2D',
-    marginTop: 4,
-  },
-  input: {
-    borderWidth: 0.5,
-    borderColor: '#D3D1C7',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-    color: '#2C2C2A',
-    backgroundColor: '#FAFAF8',
-  },
-  inputError: {
-    borderColor: '#A32D2D',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 8,
-  },
-  timeSep: {
-    fontSize: 18,
-    color: '#B4B2A9',
-    paddingBottom: 10,
-  },
-  chipRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  chip: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 0.5,
-    borderColor: '#D3D1C7',
-    alignItems: 'center',
-    backgroundColor: '#FAFAF8',
-  },
-  chipActive: {
-    backgroundColor: '#534AB7',
-    borderColor: '#534AB7',
-  },
-  chipText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#5F5E5A',
-  },
-  chipTextActive: {
-    color: '#fff',
-  },
-  colorRow: {
-    flexDirection: 'row',
-    gap: 10,
-    flexWrap: 'wrap',
-  },
-  colorSwatch: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-  },
-  colorSwatchActive: {
-    borderWidth: 3,
-    borderColor: '#2C2C2A',
-  },
-  subtaskRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-    gap: 8,
-    borderBottomWidth: 0.5,
-    borderColor: '#F1EFE8',
-  },
-  subtaskBullet: {
-    fontSize: 20,
-    color: '#888780',
-    lineHeight: 20,
-  },
-  subtaskText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#2C2C2A',
-  },
-  subtaskRemove: {
-    fontSize: 12,
-    color: '#B4B2A9',
-  },
-  subtaskInputRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 8,
-  },
-  addBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 0.5,
-    borderColor: '#534AB7',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addBtnText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#534AB7',
-  },
-});

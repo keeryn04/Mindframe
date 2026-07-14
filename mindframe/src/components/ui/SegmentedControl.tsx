@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable } from "react-native";
+import { styles } from "../../styling/SegmentedControl.styles";
 
 interface Option<T extends string | number> {
   value: T;
@@ -26,17 +27,9 @@ export function SegmentedControl<T extends string | number>({
           <Pressable
             key={opt.value}
             onPress={() => onChange(opt.value)}
-            style={[
-              styles.option,
-              isSelected && styles.optionSelected,
-            ]}
+            style={[styles.option, isSelected && styles.optionSelected]}
           >
-            <Text
-              style={[
-                styles.label,
-                isSelected && styles.labelSelected,
-              ]}
-            >
+            <Text style={[styles.label, isSelected && styles.labelSelected]}>
               {opt.label}
             </Text>
           </Pressable>
@@ -45,31 +38,3 @@ export function SegmentedControl<T extends string | number>({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    overflow: "hidden",
-  },
-  option: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
-  },
-  optionSelected: {
-    backgroundColor: "#6366f1",
-  },
-  label: {
-    fontSize: 14,
-    color: "#333",
-  },
-  labelSelected: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-});

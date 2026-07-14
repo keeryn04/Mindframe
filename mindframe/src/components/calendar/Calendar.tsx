@@ -1,13 +1,5 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  FlatList,
-  Platform,
-} from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import {
   CalendarProvider,
   ExpandableCalendar,
@@ -17,22 +9,40 @@ import { getTasksForDay } from '../../utils/calendarUtils';
 import { ScheduledTask } from '../../types/Task.types';
 import { TaskFormModal } from './TaskFormModal';
 import { TaskDetailModal } from './TaskDetailModal';
+import { SegmentedControl } from '../ui/SegmentedControl';
+import { EmptyState } from '../ui/EmptyState';
+import { colors } from '../../styling/theme';
+import { styles, calendarTheme } from '../../styling/Calendar.styles';
+
+type ListFilter = 'all' | 'active' | 'done';
+
+const FILTER_OPTIONS: { value: ListFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'active', label: 'Active' },
+  { value: 'done', label: 'Done' },
+];
+
+function applyFilter(tasks: ScheduledTask[], filter: ListFilter): ScheduledTask[] {
+  if (filter === 'all') return tasks;
+  if (filter === 'done') return tasks.filter((t) => t.status === 'complete' || t.status === 'skipped');
+  return tasks.filter((t) => t.status === 'in_progress' || t.status === 'delayed');
+}
 
 export function Calendar() {
   const [formOpen, setFormOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<ScheduledTask | null>(null);
+  const [filter, setFilter] = useState<ListFilter>('all');
 
-    const openCreate = () => {
-      setSelectedTask(null);
-      setFormOpen(true);
-    };
+  const openCreate = () => {
+    setSelectedTask(null);
+    setFormOpen(true);
+  };
 
-    const openDetail = (task: ScheduledTask) => {
-      setSelectedTask(task);
-      setDetailOpen(true);
-    };
-
+  const openDetail = (task: ScheduledTask) => {
+    setSelectedTask(task);
+    setDetailOpen(true);
+  };
 
   const {
     tasks,
@@ -46,110 +56,108 @@ export function Calendar() {
   } = useTaskStore();
 
   const markedDates = getMarkedDates(tasks, selectedDate);
-  const dailyTasks = getTasksForDay(tasks, selectedDate);
+  const dailyTasks = useMemo(
+    () => applyFilter(getTasksForDay(tasks, selectedDate), filter),
+    [tasks, selectedDate, filter]
+  );
 
   return (
-      <CalendarProvider
-        date={selectedDate}
-        onDateChanged={(date) => setSelectedDate(date)}
-      >
-        <ExpandableCalendar
-          markingType="multi-dot"
-          markedDates={markedDates}
-          theme={{
-            todayTextColor: '#534AB7',
-            selectedDayBackgroundColor: '#534AB7',
-            dotColor: '#534AB7',
-            arrowColor: '#534AB7',
-          }}
-        />
+    <CalendarProvider date={selectedDate} onDateChanged={(date) => setSelectedDate(date)}>
+      <ExpandableCalendar
+        markingType="multi-dot"
+        markedDates={markedDates}
+        theme={calendarTheme}
+      />
 
-        <TouchableOpacity style={styles.addBtn} onPress={openCreate}>
-          <Text style={styles.addBtnText}>+ Add Task</Text>
+      <View style={styles.toolbar}>
+        <View style={styles.filterWrap}>
+          <SegmentedControl options={FILTER_OPTIONS} value={filter} onChange={setFilter} />
+        </View>
+        <TouchableOpacity style={styles.addBtn} onPress={openCreate} accessibilityRole="button" accessibilityLabel="Add task">
+          <Text style={styles.addBtnText}>+ Add</Text>
         </TouchableOpacity>
+      </View>
 
-        <FlatList
-          data={dailyTasks}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
-          ListEmptyComponent={
-            <Text style={styles.empty}>No tasks for this day.</Text>
-          }
-          renderItem={({ item }) => (
-            
-              <TouchableOpacity
-                style={styles.taskRow}
-                onPress={() => openDetail(item)}
-              >
+      <FlatList
+        data={dailyTasks}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <EmptyState
+            glyph="◌"
+            title="Nothing here"
+            subtitle={filter === 'all' ? 'No tasks for this day yet.' : 'No tasks match this filter.'}
+          />
+        }
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.taskRow} onPress={() => openDetail(item)} activeOpacity={0.7}>
+            <View style={[styles.colorDot, { backgroundColor: item.color }]} />
 
-              <TouchableOpacity onPress={() => openDetail(item)} style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-                <View style={[styles.colorDot, { backgroundColor: item.color }]} />
-              </TouchableOpacity>
-
-              <Text style={[
+            <Text
+              style={[
                 styles.taskText,
-                item.status === 'complete' && styles.taskTextDone,
-                item.status === 'skipped'  && styles.taskTextDone,
-              ]}>
-                {item.title}
-              </Text>
+                (item.status === 'complete' || item.status === 'skipped') && styles.taskTextDone,
+              ]}
+              numberOfLines={1}
+            >
+              {item.title}
+            </Text>
 
-              {item.status === 'in_progress' ? (
-                <>
-                  <TouchableOpacity onPress={() => completeTask(item.id)} style={styles.action}>
-                    <Text style={styles.complete}>✓</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => delayTask(item.id)} style={styles.action}>
-                    <Text style={styles.delay}>↷</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => skipTask(item.id)} style={styles.action}>
-                    <Text style={styles.skip}>✕</Text>
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <Text style={styles.statusLabel}>
-                  {item.status}
-                </Text>
-              )}
-            </TouchableOpacity>
-          )}
-        />
+            {item.status === 'in_progress' ? (
+              <View style={styles.actionsRow}>
+                <TouchableOpacity onPress={() => completeTask(item.id)} style={styles.action} hitSlop={HIT_SLOP}>
+                  <Text style={styles.complete}>✓</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => delayTask(item.id)} style={styles.action} hitSlop={HIT_SLOP}>
+                  <Text style={styles.delay}>↷</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => skipTask(item.id)} style={styles.action} hitSlop={HIT_SLOP}>
+                  <Text style={styles.skip}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <Text style={styles.statusLabel}>{item.status.replace('_', ' ')}</Text>
+            )}
+          </TouchableOpacity>
+        )}
+      />
 
-        {/* CREATE / EDIT MODAL */}
-        <TaskFormModal
-          visible={formOpen}
-          task={selectedTask ?? undefined}
-          selectedDate={selectedDate}
-          onClose={() => setFormOpen(false)}
-          
-          onSave={(task) => {
-            if (selectedTask) {
-              updateTask(task.id, task);
-            } else {
-              addTask(task);
-            }
-            setFormOpen(false);
-          }}
-        />
+      {/* CREATE / EDIT MODAL */}
+      <TaskFormModal
+        visible={formOpen}
+        task={selectedTask ?? undefined}
+        selectedDate={selectedDate}
+        onClose={() => setFormOpen(false)}
+        onSave={(task) => {
+          if (selectedTask) {
+            updateTask(task.id, task);
+          } else {
+            addTask(task);
+          }
+          setFormOpen(false);
+        }}
+      />
 
-        {/* DETAIL MODAL */}
-        <TaskDetailModal
-          visible={detailOpen}
-          task={selectedTask}
-          onClose={() => setDetailOpen(false)}
-          onUpdate={(updated) => {
-            console.log('Updated:', updated);
-          }}
-          onComplete={(id) => completeTask(id)}
-          onDelay={(id) => delayTask(id)}
-          onSkip={(id) => skipTask(id)}
-          onDelete={(id) => {
-            console.log('Delete:', id);
-          }}
-        />
-      </CalendarProvider>
+      {/* DETAIL MODAL */}
+      <TaskDetailModal
+        visible={detailOpen}
+        task={selectedTask}
+        onClose={() => setDetailOpen(false)}
+        onUpdate={(updated) => {
+          updateTask(updated.id, updated);
+        }}
+        onComplete={(id) => completeTask(id)}
+        onDelay={(id) => delayTask(id)}
+        onSkip={(id) => skipTask(id)}
+        onDelete={(id) => {
+          console.log('Delete:', id);
+        }}
+      />
+    </CalendarProvider>
   );
 }
+
+const HIT_SLOP = { top: 8, bottom: 8, left: 8, right: 8 };
 
 function getMarkedDates(tasks: ScheduledTask[], selectedDate: string): Record<string, any> {
   const marks: Record<string, any> = {};
@@ -167,110 +175,13 @@ function getMarkedDates(tasks: ScheduledTask[], selectedDate: string): Record<st
     });
   });
 
-  // highlight selected
   if (selectedDate) {
     marks[selectedDate] = {
       ...(marks[selectedDate] || {}),
       selected: true,
-      selectedColor: '#DDD',
+      selectedColor: colors.brandSoft,
     };
   }
 
   return marks;
 }
-
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    margin: 12,
-    backgroundColor: '#F1EFE8',
-    borderRadius: 10,
-    padding: 3,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  tabActive: {
-    backgroundColor: '#FFFFFF',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 2,
-      },
-      android: { elevation: 2 },
-    }),
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#888780',
-  },
-  tabTextActive: {
-    color: '#2C2C2A',
-    fontWeight: '600',
-  },
-  content: {
-    flex: 1,
-  },
-  list: {
-  padding: 12,
-},
-
-taskRow: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingVertical: 10,
-  borderBottomWidth: 1,
-  borderColor: '#eee',
-},
-
-colorDot: {
-  width: 10,
-  height: 10,
-  borderRadius: 5,
-  marginRight: 10,
-},
-
-taskText: {
-  flex: 1,
-  fontSize: 16,
-},
-
-complete: {
-  fontSize: 18,
-  color: 'green',
-},
-taskTextSkipped: {
-  textDecorationLine: 'line-through',
-  color: '#B4B2A9',
-  opacity: 0.6,
-},
-action:      { paddingHorizontal: 6 },
-delay:       { fontSize: 18, color: '#B8860B' },
-skip:        { fontSize: 18, color: '#CC3333' },
-taskTextDone: { textDecorationLine: 'line-through', color: '#B4B2A9' },
-statusLabel: { fontSize: 11, color: '#888780', fontStyle: 'italic' },
-empty:       { padding: 16, color: '#999', fontStyle: 'italic', textAlign: 'center' },
-addBtn: {
-  margin: 12,
-  paddingVertical: 12,
-  borderRadius: 10,
-  backgroundColor: '#534AB7',
-  alignItems: 'center',
-},
-
-addBtnText: {
-  color: '#fff',
-  fontSize: 14,
-  fontWeight: '600',
-},
-});

@@ -5,12 +5,15 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  StyleSheet,
   SafeAreaView,
 } from 'react-native';
 import { ScheduledTask } from '../../types/Task.types';
 import { TaskStatus } from '../../types/calendar/Calendar.types';
 import { TaskFormModal } from './TaskFormModal';
+import { Badge } from '../ui/Badge';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { colors } from '../../styling/theme';
+import { styles } from '../../styling/TaskDetailModal.styles';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -49,17 +52,17 @@ function formatDuration(start: string, end: string): string {
 // ─── Status config ────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<TaskStatus, { label: string; color: string; bg: string }> = {
-    in_progress: { label: 'In Progress', color: '#185FA5', bg: '#E6F1FB' },
-    complete: { label: 'Complete', color: '#0F6E56', bg: '#E1F5EE' },
-    delayed: { label: 'Delayed', color: '#854F0B', bg: '#FAEEDA' },
-    skipped: { label: 'Skipped', color: '#A32D2D', bg: '#FCEBEB' },
-    failed: { label: 'Failed', color: '#A32D2D', bg: '#FCEBEB' },
+    in_progress: { label: 'In Progress', color: colors.brand, bg: colors.brandSoft },
+    complete:    { label: 'Complete',    color: colors.energy, bg: colors.energySoft },
+    delayed:     { label: 'Delayed',     color: colors.momentum, bg: colors.momentumSoft },
+    skipped:     { label: 'Skipped',     color: colors.stress, bg: colors.stressSoft },
+    failed:      { label: 'Failed',      color: colors.stress, bg: colors.stressSoft },
 };
 
 const PRIORITY_COLOR: Record<string, string> = {
-  low:    '#3B6D11',
-  medium: '#854F0B',
-  high:   '#A32D2D',
+  low:    colors.energy,
+  medium: colors.momentum,
+  high:   colors.stress,
 };
 
 // ─── Action button ────────────────────────────────────────────────────────────
@@ -79,10 +82,10 @@ function ActionButton({ label, icon, color, onPress, disabled }: ActionButtonPro
       disabled={disabled}
       style={[styles.actionBtn, disabled && styles.actionBtnDisabled]}
     >
-      <Text style={[styles.actionIcon, { color: disabled ? '#B4B2A9' : color }]}>
+      <Text style={[styles.actionIcon, { color: disabled ? colors.inkFaint : color }]}>
         {icon}
       </Text>
-      <Text style={[styles.actionLabel, { color: disabled ? '#B4B2A9' : color }]}>
+      <Text style={[styles.actionLabel, { color: disabled ? colors.inkFaint : color }]}>
         {label}
       </Text>
     </TouchableOpacity>
@@ -128,11 +131,7 @@ export function TaskDetailModal({
     onClose();
   };
 
-  const handleDelete = () => {
-    if (!confirmingDelete) {
-      setConfirmingDelete(true);
-      return;
-    }
+  const confirmDelete = () => {
     onDelete(task.id);
     setConfirmingDelete(false);
     onClose();
@@ -166,20 +165,14 @@ export function TaskDetailModal({
 
             {/* ── Badges ── */}
             <View style={styles.badgeRow}>
-              <View style={[styles.badge, { backgroundColor: statusCfg.bg }]}>
-                <Text style={[styles.badgeText, { color: statusCfg.color }]}>
-                  {statusCfg.label}
-                </Text>
-              </View>
-              <View style={[styles.badge, { backgroundColor: '#F1EFE8' }]}>
-                <Text style={[styles.badgeText, { color: PRIORITY_COLOR[task.priority] ?? '#5F5E5A' }]}>
-                  {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} priority
-                </Text>
-              </View>
+              <Badge label={statusCfg.label} color={statusCfg.color} backgroundColor={statusCfg.bg} />
+              <Badge
+                label={`${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} priority`}
+                color={PRIORITY_COLOR[task.priority] ?? colors.inkMuted}
+                backgroundColor={colors.surfaceAlt}
+              />
               {task.isRecommended && (
-                <View style={[styles.badge, { backgroundColor: '#EEEDFE' }]}>
-                  <Text style={[styles.badgeText, { color: '#534AB7' }]}>Recommended</Text>
-                </View>
+                <Badge label="Recommended" color={colors.brand} backgroundColor={colors.brandSoft} />
               )}
             </View>
 
@@ -210,21 +203,21 @@ export function TaskDetailModal({
                 <ActionButton
                   label="Complete"
                   icon="✓"
-                  color="#0F6E56"
+                  color={colors.energy}
                   onPress={() => handleAction(() => onComplete(task.id))}
                   disabled={!isActionable}
                 />
                 <ActionButton
                   label="Delay"
                   icon="↷"
-                  color="#854F0B"
+                  color={colors.momentum}
                   onPress={() => handleAction(() => onDelay(task.id))}
                   disabled={!isActionable}
                 />
                 <ActionButton
                   label="Skip"
                   icon="✕"
-                  color="#A32D2D"
+                  color={colors.stress}
                   onPress={() => handleAction(() => onSkip(task.id))}
                   disabled={!isActionable}
                 />
@@ -238,13 +231,8 @@ export function TaskDetailModal({
             </View>
 
             {/* ── Delete ── */}
-            <TouchableOpacity
-              onPress={handleDelete}
-              style={[styles.deleteBtn, confirmingDelete && styles.deleteBtnConfirm]}
-            >
-              <Text style={[styles.deleteBtnText, confirmingDelete && styles.deleteBtnTextConfirm]}>
-                {confirmingDelete ? 'Tap again to confirm delete' : 'Delete task'}
-              </Text>
+            <TouchableOpacity onPress={() => setConfirmingDelete(true)} style={styles.deleteBtn}>
+              <Text style={styles.deleteBtnText}>Delete task</Text>
             </TouchableOpacity>
 
           </ScrollView>
@@ -262,6 +250,15 @@ export function TaskDetailModal({
           setEditOpen(false);
         }}
       />
+
+      <ConfirmDialog
+        visible={confirmingDelete}
+        title="Delete this task?"
+        message={`"${task.title}" will be removed permanently. This can't be undone.`}
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </>
   );
 }
@@ -278,177 +275,4 @@ function InfoRow({ icon, label, value }: { icon: string; label: string; value: s
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const HIT_SLOP = { top: 12, bottom: 12, left: 12, right: 12 };
-
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 0.5,
-    borderColor: '#E0E0E0',
-  },
-  closeBtn: {
-    fontSize: 16,
-    color: '#888780',
-  },
-  editBtn: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#534AB7',
-  },
-  body: {
-    padding: 20,
-    paddingBottom: 48,
-  },
-  colorBar: {
-    height: 4,
-    borderRadius: 2,
-    marginBottom: 16,
-  },
-  taskTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#2C2C2A',
-    marginBottom: 12,
-    lineHeight: 28,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 20,
-  },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  infoBlock: {
-    borderWidth: 0.5,
-    borderColor: '#E0E0E0',
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginBottom: 24,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    borderBottomWidth: 0.5,
-    borderColor: '#F1EFE8',
-    gap: 10,
-  },
-  infoIcon: {
-    fontSize: 15,
-    width: 22,
-    textAlign: 'center',
-  },
-  infoLabel: {
-    fontSize: 13,
-    color: '#888780',
-    width: 64,
-  },
-  infoValue: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#2C2C2A',
-    textAlign: 'right',
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#888780',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    marginBottom: 12,
-  },
-  subtaskRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 7,
-    borderBottomWidth: 0.5,
-    borderColor: '#F1EFE8',
-  },
-  subtaskDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    flexShrink: 0,
-  },
-  subtaskText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#2C2C2A',
-  },
-  actionRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  actionBtn: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 10,
-    borderWidth: 0.5,
-    borderColor: '#D3D1C7',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#FAFAF8',
-  },
-  actionBtnDisabled: {
-    opacity: 0.45,
-  },
-  actionIcon: {
-    fontSize: 20,
-  },
-  actionLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-  },
-  finishedNote: {
-    marginTop: 10,
-    fontSize: 12,
-    color: '#B4B2A9',
-    fontStyle: 'italic',
-    textAlign: 'center',
-  },
-  deleteBtn: {
-    paddingVertical: 14,
-    borderRadius: 10,
-    borderWidth: 0.5,
-    borderColor: '#D3D1C7',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  deleteBtnConfirm: {
-    borderColor: '#A32D2D',
-    backgroundColor: '#FFF5F5',
-  },
-  deleteBtnText: {
-    fontSize: 14,
-    color: '#B4B2A9',
-  },
-  deleteBtnTextConfirm: {
-    color: '#A32D2D',
-    fontWeight: '600',
-  },
-});
