@@ -5,7 +5,6 @@ import { useDatabase } from "../db/useDatabase";
 import { TabNavigator } from "./TabNavigator";
 import { LoadingScreen } from "../screens/LoadingScreen";
 import { ErrorScreen } from "../screens/ErrorScreen";
-import { BreaksScreen } from "../screens/BreaksScreen";
 import { BreakPromptModal } from "../components/breaks/BreakPromptModal";
 import { ROUTES } from "./routes";
 
@@ -13,7 +12,6 @@ export type RootStackParamList = {
   [ROUTES.LOADING]: undefined;
   [ROUTES.ERROR]: { message: string };
   [ROUTES.MAIN]: undefined;
-  [ROUTES.BREAKS]: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -51,11 +49,6 @@ export function RootNavigator() {
         {ready && (
           <>
             <Stack.Screen name={ROUTES.MAIN} component={TabNavigator} />
-            <Stack.Screen
-              name={ROUTES.BREAKS}
-              component={BreaksScreen}
-              options={{ presentation: "modal", headerShown: false }}
-            />
           </>
         )}
       </Stack.Navigator>

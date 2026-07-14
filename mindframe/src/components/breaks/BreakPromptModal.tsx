@@ -1,22 +1,15 @@
 import React from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { useUserStateStore } from "../../store/useUserStateStore";
 import { useBreakPromptStore } from "../../store/useBreakPromptStore";
 import { THRESHOLDS } from "../../types/UserState.types";
-import { ROUTES } from "../../navigators/routes";
 
-/**
- * Mounted once at the root of the navigation tree (see RootNavigator)
- * so it can float over any screen. Visibility is fully derived from
- * useUserStateStore + useBreakPromptStore — no event listeners needed.
- */
 export function BreakPromptModal() {
-  const navigation = useNavigation<any>();
   const state = useUserStateStore((s) => s.state);
   const dismissedAt = useBreakPromptStore((s) => s.dismissedAt);
   const canShow = useBreakPromptStore((s) => s.canShow);
   const dismiss = useBreakPromptStore((s) => s.dismiss);
+  const openModal = useBreakPromptStore((s) => s.openModal);
 
   const isCritical =
     state.energyLevel < THRESHOLDS.criticalEnergy ||
@@ -26,7 +19,7 @@ export function BreakPromptModal() {
 
   function handleStartActivity() {
     dismiss();
-    navigation.navigate(ROUTES.BREAKS);
+    openModal();
   }
 
   function handleDismiss() {
@@ -60,46 +53,12 @@ export function BreakPromptModal() {
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 24,
-    width: "100%",
-    maxWidth: 360,
-  },
-  headline: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  detail: {
-    fontSize: 14,
-    color: "#4A4A4A",
-    marginBottom: 20,
-  },
-  primaryButton: {
-    backgroundColor: "#D85A30",
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  secondaryButton: {
-    paddingVertical: 8,
-    alignItems: "center",
-  },
-  secondaryButtonText: {
-    color: "#8A8A8A",
-  },
+  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", alignItems: "center", justifyContent: "center", padding: 24 },
+  card: { backgroundColor: "#FFFFFF", borderRadius: 16, padding: 24, width: "100%", maxWidth: 360 },
+  headline: { fontSize: 18, fontWeight: "600", marginBottom: 8 },
+  detail: { fontSize: 14, color: "#4A4A4A", marginBottom: 20 },
+  primaryButton: { backgroundColor: "#D85A30", paddingVertical: 12, borderRadius: 8, alignItems: "center", marginBottom: 8 },
+  primaryButtonText: { color: "#FFFFFF", fontWeight: "600" },
+  secondaryButton: { paddingVertical: 8, alignItems: "center" },
+  secondaryButtonText: { color: "#8A8A8A" },
 });
