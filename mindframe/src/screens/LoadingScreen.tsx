@@ -1,12 +1,8 @@
 // src/screens/LoadingScreen.tsx
 import React, { useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  Animated,
-  StyleSheet,
-  SafeAreaView,
-} from "react-native";
+import { View, Text, Animated } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { styles } from "../styling/screens/LoadingScreen.styles";
 
 export function LoadingScreen() {
   const dot1 = useRef(new Animated.Value(0)).current;
@@ -40,35 +36,24 @@ export function LoadingScreen() {
   });
 
   return (
-    <SafeAreaView style={s.safe}>
-      <View style={s.center}>
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.center}>
 
         {/* Wordmark */}
-        <View style={s.wordmarkWrap}>
-          <View style={s.wordmarkAccent} />
-          <Text style={s.wordmark}>focus</Text>
+        <View style={styles.wordmarkWrap}>
+          <View style={styles.wordmarkAccent} />
+          <Text style={styles.wordmark}>focus</Text>
         </View>
 
         {/* Dots */}
-        <View style={s.dotsRow}>
+        <View style={styles.dotsRow}>
           {[dot1, dot2, dot3].map((d, i) => (
-            <Animated.View key={i} style={[s.dot, dotStyle(d)]} />
+            <Animated.View key={i} style={[styles.dot, dotStyle(d)]} />
           ))}
         </View>
 
-        <Text style={s.label}>Setting things up</Text>
+        <Text style={styles.label}>Setting things up</Text>
       </View>
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  safe:           { flex: 1, backgroundColor: "#FAFAF8" },
-  center:         { flex: 1, alignItems: "center", justifyContent: "center", gap: 28 },
-  wordmarkWrap:   { flexDirection: "row", alignItems: "center", gap: 8 },
-  wordmarkAccent: { width: 6, height: 32, borderRadius: 3, backgroundColor: "#534AB7" },
-  wordmark:       { fontSize: 32, fontWeight: "700", color: "#1A1A18", letterSpacing: -1 },
-  dotsRow:        { flexDirection: "row", gap: 8, height: 16, alignItems: "flex-end" },
-  dot:            { width: 7, height: 7, borderRadius: 4, backgroundColor: "#534AB7" },
-  label:          { fontSize: 13, color: "#888780", letterSpacing: 0.3 },
-});

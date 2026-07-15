@@ -16,7 +16,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const colors = {
-  // Neutrals — warm mist, not the generic cream/terracotta combo
   bg: "#F3F6F0",
   surface: "#FFFFFF",
   surfaceAlt: "#ECEFE6",

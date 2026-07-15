@@ -1,8 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // screens/StatsScreen.tsx
 //
-// Layout-only screen.  It calls useStatsData() once and fans the result out
-// to each section.  No logic lives here — all computation is in the hook and
+// Layout-only screen. It calls useStatsData() once and fans the result out
+// to each section. No logic lives here — all computation is in the hook and
 // all rendering is in the leaf components.
 //
 // Scroll structure (top → bottom):
@@ -14,16 +14,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React from "react";
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useStatsData } from "../utils/useStatsData";
 
+import { ScreenHeader }          from "../components/ui/ScreenHeader";
 import { SectionCard }          from "../components/ui/SectionCard";
 import { StatsSummaryCard }     from "../components/stats/StatsSummaryCard";
 import { UserStateGauge }       from "../components/stats/UserStateGauge";
@@ -36,6 +32,8 @@ import {
   METRIC_LABELS,
   OUTCOME_COLORS,
 } from "../styling/statsTheme";
+
+import { styles } from "../styling/screens/StatsScreen.styles";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -57,13 +55,8 @@ export function StatsScreen() {
   const data = useStatsData();
 
   return (
-    <View style={styles.root}>
-      <StatusBar barStyle="dark-content" />
-
-      {/* Page header */}
-      <View style={styles.pageHeader}>
-        <Text style={styles.pageTitle}>Your stats</Text>
-      </View>
+    <SafeAreaView style={styles.root} edges={["top"]}>
+      <ScreenHeader title="Your stats" subtitle="How the week is going" />
 
       <ScrollView
         style={styles.scroll}
@@ -87,10 +80,12 @@ export function StatsScreen() {
             label="Streak"
             value={data.currentStreak}
             unit="d"
+            accentColor={METRIC_COLORS.momentum}
           />
           <StatsSummaryCard
             label="Avg time"
             value={formatDuration(data.avgTaskDurationMinutes)}
+            accentColor={METRIC_COLORS.focusLevel}
           />
         </View>
 
@@ -164,7 +159,7 @@ export function StatsScreen() {
 
         <View style={styles.bottomPad} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -178,68 +173,3 @@ function StreakPill({ label, value }: { label: string; value: number }) {
     </View>
   );
 }
-
-// ── Styles ───────────────────────────────────────────────────────────────────
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: "#F1EFE8",   // page background (c-gray-50)
-  },
-  pageHeader: {
-    paddingTop: 56,
-    paddingHorizontal: 20,
-    paddingBottom: 12,
-  },
-  pageTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#2C2C2A",
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 4,
-  },
-  summaryRow: {
-    flexDirection: "row",
-    marginBottom: 12,
-    marginHorizontal: -4,
-  },
-  gaugeGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-around",
-    gap: 12,
-    marginBottom: 16,
-  },
-  streakRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  streakPill: {
-    flex: 1,
-    backgroundColor: "#F1EFE8",
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  streakValue: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#2C2C2A",
-  },
-  streakLabel: {
-    fontSize: 12,
-    color: "#888780",
-    flex: 1,
-  },
-  bottomPad: {
-    height: 32,
-  },
-});

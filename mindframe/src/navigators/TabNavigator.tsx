@@ -5,6 +5,8 @@ import { HomeScreen }    from "../screens/HomeScreen";
 import { StatsScreen }   from "../screens/StatsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { ROUTES }        from "./routes";
+import { colors } from "../styling/theme";
+import { tabBarStyle } from "../styling/TabNavigator.styles";
 
 export type TabParamList = {
   [ROUTES.HOME]:    undefined;
@@ -27,6 +29,10 @@ export function TabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        tabBarStyle,
+        tabBarActiveTintColor: colors.brand,
+        tabBarInactiveTintColor: colors.inkFaint,
+        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
         tabBarIcon: ({ focused, color, size }) => {
           const icons = TAB_ICONS[route.name as keyof TabParamList];
           const name  = focused ? icons.focused : icons.default;
