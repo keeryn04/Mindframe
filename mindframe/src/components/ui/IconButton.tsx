@@ -1,6 +1,6 @@
 import React from "react";
 import { Pressable, Text } from "react-native";
-import { styles } from "../../styling/IconButton.styles";
+import { styles } from "../../styling/components/ui/IconButton.styles";
 
 interface IconButtonProps {
   glyph: string;

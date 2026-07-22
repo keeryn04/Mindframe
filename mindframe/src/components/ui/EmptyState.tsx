@@ -1,6 +1,6 @@
 import React from "react";
 import { Text, View } from "react-native";
-import { styles } from "../../styling/EmptyState.styles";
+import { styles } from "../../styling/components/ui/EmptyState.styles";
 
 interface EmptyStateProps {
   glyph?: string;

@@ -12,7 +12,7 @@ import { DailyCount } from "../../types/stats/stats.types";
 import { toLocalDateString } from "../../utils/useStatsData";
 import { colors } from "../../styling/theme";
 import { EmptyState } from "../ui/EmptyState";
-import { styles } from "../../styling/ProductivityTimeline.styles";
+import { styles } from "../../styling/components/stats/ProductivityTimeline.styles";
 
 interface Props {
   days: DailyCount[]; // exactly 7 entries, oldest first

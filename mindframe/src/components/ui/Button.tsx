@@ -1,6 +1,6 @@
 import React from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
-import { styles } from "../../styling/Button.styles";
+import { styles } from "../../styling/components/ui/Button.styles";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 

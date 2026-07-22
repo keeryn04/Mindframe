@@ -8,7 +8,7 @@ import React from "react";
 import { Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { colors } from "../../styling/theme";
-import { styles } from "../../styling/UserStateGauge.styles";
+import { styles } from "../../styling/components/stats/UserStateGauge.styles";
 
 interface Props {
   value: number; // 0–100

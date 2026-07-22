@@ -14,7 +14,7 @@ import {
   PRIORITY_LABELS,
 } from "../../styling/statsTheme";
 import { PriorityOutcomes } from "../../types/stats/stats.types";
-import { styles } from "../../styling/PriorityBreakdown.styles";
+import { styles } from "../../styling/components/stats/PriorityBreakdown.styles";
 
 interface Props {
   data: PriorityOutcomes[];

@@ -11,7 +11,7 @@ import { PieChart } from "react-native-gifted-charts";
 import { OUTCOME_COLORS, OUTCOME_LABELS } from "../../styling/statsTheme";
 import { colors } from "../../styling/theme";
 import { EmptyState } from "../ui/EmptyState";
-import { styles } from "../../styling/TaskCompletionChart.styles";
+import { styles } from "../../styling/components/stats/TaskCompletionChart.styles";
 
 interface Props {
   completedCount: number;

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, Easing, Text } from "react-native";
-import { styles } from "../../styling/Toast.styles";
+import { styles } from "../../styling/components/profile/Toast.styles";
 
 export type ToastStatus = "idle" | "saving" | "saved";
 

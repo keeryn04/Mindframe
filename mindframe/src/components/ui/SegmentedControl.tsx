@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
-import { styles } from "../../styling/SegmentedControl.styles";
+import { styles } from "../../styling/components/ui/SegmentedControl.styles";
 
 interface Option<T extends string | number> {
   value: T;

@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import Svg, { Circle } from "react-native-svg";
 import { BreakActivity } from "../../types/breaks/BreakActivity.types";
+import { Button } from "../ui/Button";
+import { colors } from "../../styling/theme";
+import { styles } from "../../styling/components/breaks/ActiveActivitySession.styles";
 
 interface ActiveActivitySessionProps {
   activity: BreakActivity;
@@ -8,6 +12,11 @@ interface ActiveActivitySessionProps {
   onComplete: (actualMinutes: number) => void;
   onCancel: () => void;
 }
+
+const DIAL_SIZE = 148;
+const DIAL_STROKE = 8;
+const DIAL_RADIUS = (DIAL_SIZE - DIAL_STROKE) / 2;
+const DIAL_CIRCUMFERENCE = 2 * Math.PI * DIAL_RADIUS;
 
 export function ActiveActivitySession({ activity, onComplete, onCancel }: ActiveActivitySessionProps) {
   const totalSeconds = activity.defaultDurationMinutes * 60;
@@ -30,69 +39,57 @@ export function ActiveActivitySession({ activity, onComplete, onCancel }: Active
 
   const minutes = Math.floor(secondsLeft / 60).toString().padStart(2, "0");
   const seconds = (secondsLeft % 60).toString().padStart(2, "0");
+  const progress = totalSeconds === 0 ? 0 : 1 - secondsLeft / totalSeconds;
+  const dashOffset = DIAL_CIRCUMFERENCE * (1 - progress);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{activity.title}</Text>
-      <Text style={styles.timer}>{minutes}:{seconds}</Text>
+
+      <View style={styles.dialWrap}>
+        <Svg width={DIAL_SIZE} height={DIAL_SIZE}>
+          <Circle
+            cx={DIAL_SIZE / 2}
+            cy={DIAL_SIZE / 2}
+            r={DIAL_RADIUS}
+            stroke={colors.surfaceSunken}
+            strokeWidth={DIAL_STROKE}
+            fill="none"
+          />
+          <Circle
+            cx={DIAL_SIZE / 2}
+            cy={DIAL_SIZE / 2}
+            r={DIAL_RADIUS}
+            stroke={colors.energy}
+            strokeWidth={DIAL_STROKE}
+            strokeLinecap="round"
+            strokeDasharray={DIAL_CIRCUMFERENCE}
+            strokeDashoffset={dashOffset}
+            fill="none"
+            rotation={-90}
+            origin={`${DIAL_SIZE / 2}, ${DIAL_SIZE / 2}`}
+          />
+        </Svg>
+        <View style={styles.dialCenter}>
+          <Text style={styles.timer}>{minutes}:{seconds}</Text>
+        </View>
+      </View>
 
       {activity.steps && (
         <View style={styles.steps}>
           {activity.steps.map((step, i) => (
-            <Text key={i} style={styles.step}>{i + 1}. {step}</Text>
+            <View key={i} style={styles.stepRow}>
+              <View style={styles.stepDot} />
+              <Text style={styles.step}>{step}</Text>
+            </View>
           ))}
         </View>
       )}
 
-      <Pressable style={styles.doneButton} onPress={finishEarly} accessibilityRole="button">
-        <Text style={styles.doneButtonText}>I'm done</Text>
-      </Pressable>
-      <Pressable style={styles.cancelButton} onPress={onCancel} accessibilityRole="button">
-        <Text style={styles.cancelButtonText}>Cancel</Text>
-      </Pressable>
+      <View style={styles.actions}>
+        <Button label="I'm done" onPress={finishEarly} />
+        <Button label="Cancel" variant="ghost" onPress={onCancel} />
+      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    padding: 24,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 16,
-  },
-  timer: {
-    fontSize: 48,
-    fontWeight: "300",
-    marginBottom: 24,
-  },
-  steps: {
-    marginBottom: 24,
-    alignSelf: "stretch",
-  },
-  step: {
-    fontSize: 14,
-    color: "#4A4A4A",
-    marginBottom: 4,
-  },
-  doneButton: {
-    backgroundColor: "#1D9E75",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  doneButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  cancelButton: {
-    paddingVertical: 8,
-  },
-  cancelButtonText: {
-    color: "#8A8A8A",
-  },
-});

@@ -27,6 +27,7 @@ const TAB_ICONS: Record<keyof TabParamList, { focused: IoniconName; default: Ion
 export function TabNavigator() {
   return (
     <Tab.Navigator
+      initialRouteName={ROUTES.HOME}
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle,

@@ -1,6 +1,6 @@
 import React from "react";
 import { Text, View } from "react-native";
-import { styles } from "../../styling/Badge.styles";
+import { styles } from "../../styling/components/ui/Badge.styles";
 
 interface BadgeProps {
   label: string;

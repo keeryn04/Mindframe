@@ -9,10 +9,12 @@ import { getTasksForDay } from '../../utils/calendarUtils';
 import { ScheduledTask } from '../../types/Task.types';
 import { TaskFormModal } from './TaskFormModal';
 import { TaskDetailModal } from './TaskDetailModal';
+import { DelayTaskDialog } from './DelayTaskDialog';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import { EmptyState } from '../ui/EmptyState';
 import { colors } from '../../styling/theme';
-import { styles, calendarTheme } from '../../styling/Calendar.styles';
+import { styles, calendarTheme } from '../../styling/components/calendar/Calendar.styles';
 
 type ListFilter = 'all' | 'active' | 'done';
 
@@ -28,11 +30,33 @@ function applyFilter(tasks: ScheduledTask[], filter: ListFilter): ScheduledTask[
   return tasks.filter((t) => t.status === 'in_progress' || t.status === 'delayed');
 }
 
+// ─── Modal orchestration ────────────────────────────────────────────────────
+//
+// Four modals live here: create/edit form, task detail, delay-date picker,
+// and delete confirmation. Only one is ever visible at a time — every
+// "open the next one" handler closes whichever is currently open first.
+// Stacking multiple native <Modal>s at once previously froze touch input,
+// so this single-owner approach is intentional, not incidental.
+
 export function Calendar() {
   const [formOpen, setFormOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<ScheduledTask | null>(null);
+  const [delayTarget, setDelayTarget] = useState<ScheduledTask | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ScheduledTask | null>(null);
   const [filter, setFilter] = useState<ListFilter>('all');
+
+  const {
+    tasks,
+    selectedDate,
+    setSelectedDate,
+    addTask,
+    updateTask,
+    removeTask,
+    completeTask,
+    delayTask,
+    skipTask,
+  } = useTaskStore();
 
   const openCreate = () => {
     setSelectedTask(null);
@@ -44,16 +68,31 @@ export function Calendar() {
     setDetailOpen(true);
   };
 
-  const {
-    tasks,
-    selectedDate,
-    setSelectedDate,
-    addTask,
-    updateTask,
-    completeTask,
-    delayTask,
-    skipTask,
-  } = useTaskStore();
+  const handleEdit = (task: ScheduledTask) => {
+    setDetailOpen(false);
+    setSelectedTask(task);
+    setFormOpen(true);
+  };
+
+  const handleRequestDelay = (task: ScheduledTask) => {
+    setDetailOpen(false);
+    setDelayTarget(task);
+  };
+
+  const handleConfirmDelay = (newDate: string) => {
+    if (delayTarget) delayTask(delayTarget.id, newDate);
+    setDelayTarget(null);
+  };
+
+  const handleRequestDelete = (task: ScheduledTask) => {
+    setDetailOpen(false);
+    setDeleteTarget(task);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteTarget) removeTask(deleteTarget.id);
+    setDeleteTarget(null);
+  };
 
   const markedDates = getMarkedDates(tasks, selectedDate);
   const dailyTasks = useMemo(
@@ -108,7 +147,7 @@ export function Calendar() {
                 <TouchableOpacity onPress={() => completeTask(item.id)} style={styles.action} hitSlop={HIT_SLOP}>
                   <Text style={styles.complete}>✓</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => delayTask(item.id)} style={styles.action} hitSlop={HIT_SLOP}>
+                <TouchableOpacity onPress={() => handleRequestDelay(item)} style={styles.action} hitSlop={HIT_SLOP}>
                   <Text style={styles.delay}>↷</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => skipTask(item.id)} style={styles.action} hitSlop={HIT_SLOP}>
@@ -143,15 +182,30 @@ export function Calendar() {
         visible={detailOpen}
         task={selectedTask}
         onClose={() => setDetailOpen(false)}
-        onUpdate={(updated) => {
-          updateTask(updated.id, updated);
-        }}
         onComplete={(id) => completeTask(id)}
-        onDelay={(id) => delayTask(id)}
         onSkip={(id) => skipTask(id)}
-        onDelete={(id) => {
-          console.log('Delete:', id);
-        }}
+        onEdit={handleEdit}
+        onRequestDelay={handleRequestDelay}
+        onRequestDelete={handleRequestDelete}
+      />
+
+      {/* DELAY DATE PICKER */}
+      <DelayTaskDialog
+        visible={!!delayTarget}
+        taskTitle={delayTarget?.title}
+        initialDate={delayTarget ? delayTarget.startDateTime.split('T')[0] : undefined}
+        onConfirm={handleConfirmDelay}
+        onCancel={() => setDelayTarget(null)}
+      />
+
+      {/* DELETE CONFIRMATION */}
+      <ConfirmDialog
+        visible={!!deleteTarget}
+        title="Delete this task?"
+        message={deleteTarget ? `"${deleteTarget.title}" will be removed permanently. This can't be undone.` : undefined}
+        confirmLabel="Delete"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
       />
     </CalendarProvider>
   );

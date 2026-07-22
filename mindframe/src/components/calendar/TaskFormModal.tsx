@@ -13,7 +13,7 @@ import {
 import { ScheduledTask } from '../../types/Task.types';
 import { TaskPriority, TaskStatus } from '../../types/calendar/Calendar.types';
 import { colors } from '../../styling/theme';
-import { styles } from '../../styling/TaskFormModal.styles';
+import { styles } from '../../styling/components/calendar/TaskFormModal.styles';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

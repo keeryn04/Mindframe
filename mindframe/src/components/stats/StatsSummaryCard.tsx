@@ -7,7 +7,7 @@
 
 import React from "react";
 import { Text, View } from "react-native";
-import { styles } from "../../styling/StatsSummaryCard.styles";
+import { styles } from "../../styling/components/stats/StatsSummaryCard.styles";
 
 interface Props {
   label: string;

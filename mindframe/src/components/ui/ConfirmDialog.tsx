@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, Pressable, Text, View } from "react-native";
 import { Button } from "./Button";
-import { styles } from "../../styling/ConfirmDialog.styles";
+import { styles } from "../../styling/components/ui/ConfirmDialog.styles";
 
 interface ConfirmDialogProps {
   visible: boolean;

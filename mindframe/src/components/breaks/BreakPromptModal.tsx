@@ -4,7 +4,7 @@ import { useUserStateStore } from "../../store/useUserStateStore";
 import { useBreakPromptStore } from "../../store/useBreakPromptStore";
 import { THRESHOLDS } from "../../types/UserState.types";
 import { Button } from "../ui/Button";
-import { styles } from "../../styling/BreakPromptModal.styles";
+import { styles } from "../../styling/components/breaks/BreakPromptModal.styles";
 
 export function BreakPromptModal() {
   const state = useUserStateStore((s) => s.state);

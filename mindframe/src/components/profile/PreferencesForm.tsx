@@ -9,7 +9,7 @@ import {
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { RecommendationModeToggle } from "./RecommendationModeToggle";
 import { colors } from "../../styling/theme";
-import { styles } from "../../styling/PreferencesForm.styles";
+import { styles } from "../../styling/components/profile/PreferencesForm.styles";
 
 interface Props {
   preferences: UserPreferences;

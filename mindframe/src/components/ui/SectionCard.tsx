@@ -7,7 +7,7 @@
 
 import React from "react";
 import { Text, View } from "react-native";
-import { styles } from "../../styling/SectionCard.styles";
+import { styles } from "../../styling/components/ui/SectionCard.styles";
 
 interface Props {
   title: string;

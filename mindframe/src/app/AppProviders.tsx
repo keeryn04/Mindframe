@@ -9,7 +9,7 @@ import { createTaskRepo } from "../db/repositories/taskRepo";
 import { useTaskStore } from "../store/useTaskStore";
 import { useUserPreferencesStore } from "../store/useUserPreferencesStore";
 import { createUserPreferencesRepo } from "../db/repositories/userPreferencesRepo";
-import { navigationTheme } from "../styling/NavigationTheme";
+import { navigationTheme } from "../styling/navigationTheme";
 
 interface Props {
   children: React.ReactNode;

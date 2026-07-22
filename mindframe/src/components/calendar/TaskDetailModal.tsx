@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Modal,
   View,
@@ -9,11 +9,9 @@ import {
 } from 'react-native';
 import { ScheduledTask } from '../../types/Task.types';
 import { TaskStatus } from '../../types/calendar/Calendar.types';
-import { TaskFormModal } from './TaskFormModal';
 import { Badge } from '../ui/Badge';
-import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { colors } from '../../styling/theme';
-import { styles } from '../../styling/TaskDetailModal.styles';
+import { styles } from '../../styling/components/calendar/TaskDetailModal.styles';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -93,16 +91,22 @@ function ActionButton({ label, icon, color, onPress, disabled }: ActionButtonPro
 }
 
 // ─── Props ────────────────────────────────────────────────────────────────────
+//
+// This modal never opens another <Modal> itself — every action that needs a
+// follow-up UI (edit, delay, delete) hands the task back to the parent via a
+// callback instead. The parent (Calendar) closes this modal first and then
+// opens the next one, so only one native Modal is ever visible at a time.
+// Stacking multiple <Modal>s at once is what previously froze touch input.
 
 interface TaskDetailModalProps {
   visible: boolean;
   task: ScheduledTask | null;
   onClose: () => void;
-  onUpdate: (task: ScheduledTask) => void;
   onComplete: (id: string) => void;
-  onDelay:    (id: string) => void;
   onSkip:     (id: string) => void;
-  onDelete:   (id: string) => void;
+  onEdit:          (task: ScheduledTask) => void;
+  onRequestDelay:  (task: ScheduledTask) => void;
+  onRequestDelete: (task: ScheduledTask) => void;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -111,15 +115,12 @@ export function TaskDetailModal({
   visible,
   task,
   onClose,
-  onUpdate,
   onComplete,
-  onDelay,
   onSkip,
-  onDelete,
+  onEdit,
+  onRequestDelay,
+  onRequestDelete,
 }: TaskDetailModalProps) {
-  const [editOpen, setEditOpen] = useState(false);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
-
   if (!task) return null;
 
   const statusCfg = STATUS_CONFIG[task.status];
@@ -131,135 +132,106 @@ export function TaskDetailModal({
     onClose();
   };
 
-  const confirmDelete = () => {
-    onDelete(task.id);
-    setConfirmingDelete(false);
-    onClose();
-  };
-
   return (
-    <>
-      <Modal
-        visible={visible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={onClose}
-      >
-        <SafeAreaView style={styles.safe}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView style={styles.safe}>
 
-          {/* ── Header ── */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onClose} hitSlop={HIT_SLOP}>
-              <Text style={styles.closeBtn}>Done</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setEditOpen(true)} hitSlop={HIT_SLOP}>
-              <Text style={styles.editBtn}>Edit</Text>
-            </TouchableOpacity>
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onClose} hitSlop={HIT_SLOP}>
+            <Text style={styles.closeBtn}>Done</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => onEdit(task)} hitSlop={HIT_SLOP}>
+            <Text style={styles.editBtn}>Edit</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView contentContainerStyle={styles.body}>
+
+          {/* ── Color bar + title ── */}
+          <View style={[styles.colorBar, { backgroundColor: task.color }]} />
+          <Text style={styles.taskTitle}>{task.title}</Text>
+
+          {/* ── Badges ── */}
+          <View style={styles.badgeRow}>
+            <Badge label={statusCfg.label} color={statusCfg.color} backgroundColor={statusCfg.bg} />
+            <Badge
+              label={`${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} priority`}
+              color={PRIORITY_COLOR[task.priority] ?? colors.inkMuted}
+              backgroundColor={colors.surfaceAlt}
+            />
+            {task.isRecommended && (
+              <Badge label="Recommended" color={colors.brand} backgroundColor={colors.brandSoft} />
+            )}
           </View>
 
-          <ScrollView contentContainerStyle={styles.body}>
+          {/* ── Time info ── */}
+          <View style={styles.infoBlock}>
+            <InfoRow icon="🕐" label="Time" value={formatTimeRange(task.startDateTime, task.endDateTime)} />
+            <InfoRow icon="⏱" label="Duration" value={formatDuration(task.startDateTime, task.endDateTime)} />
+            <InfoRow icon="📅" label="Date" value={formatDateTime(task.startDateTime).split(' · ')[0]} />
+          </View>
 
-            {/* ── Color bar + title ── */}
-            <View style={[styles.colorBar, { backgroundColor: task.color }]} />
-            <Text style={styles.taskTitle}>{task.title}</Text>
-
-            {/* ── Badges ── */}
-            <View style={styles.badgeRow}>
-              <Badge label={statusCfg.label} color={statusCfg.color} backgroundColor={statusCfg.bg} />
-              <Badge
-                label={`${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} priority`}
-                color={PRIORITY_COLOR[task.priority] ?? colors.inkMuted}
-                backgroundColor={colors.surfaceAlt}
-              />
-              {task.isRecommended && (
-                <Badge label="Recommended" color={colors.brand} backgroundColor={colors.brandSoft} />
-              )}
-            </View>
-
-            {/* ── Time info ── */}
-            <View style={styles.infoBlock}>
-              <InfoRow icon="🕐" label="Time" value={formatTimeRange(task.startDateTime, task.endDateTime)} />
-              <InfoRow icon="⏱" label="Duration" value={formatDuration(task.startDateTime, task.endDateTime)} />
-              <InfoRow icon="📅" label="Date" value={formatDateTime(task.startDateTime).split(' · ')[0]} />
-            </View>
-
-            {/* ── Subtasks ── */}
-            {task.subtasks && task.subtasks.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Subtasks</Text>
-                {task.subtasks.map((s, i) => (
-                  <View key={i} style={styles.subtaskRow}>
-                    <View style={[styles.subtaskDot, { backgroundColor: task.color }]} />
-                    <Text style={styles.subtaskText}>{s}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-
-            {/* ── Actions ── */}
+          {/* ── Subtasks ── */}
+          {task.subtasks && task.subtasks.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>Actions</Text>
-              <View style={styles.actionRow}>
-                <ActionButton
-                  label="Complete"
-                  icon="✓"
-                  color={colors.energy}
-                  onPress={() => handleAction(() => onComplete(task.id))}
-                  disabled={!isActionable}
-                />
-                <ActionButton
-                  label="Delay"
-                  icon="↷"
-                  color={colors.momentum}
-                  onPress={() => handleAction(() => onDelay(task.id))}
-                  disabled={!isActionable}
-                />
-                <ActionButton
-                  label="Skip"
-                  icon="✕"
-                  color={colors.stress}
-                  onPress={() => handleAction(() => onSkip(task.id))}
-                  disabled={!isActionable}
-                />
-              </View>
+              <Text style={styles.sectionLabel}>Subtasks</Text>
+              {task.subtasks.map((s, i) => (
+                <View key={i} style={styles.subtaskRow}>
+                  <View style={[styles.subtaskDot, { backgroundColor: task.color }]} />
+                  <Text style={styles.subtaskText}>{s}</Text>
+                </View>
+              ))}
+            </View>
+          )}
 
-              {isFinished && (
-                <Text style={styles.finishedNote}>
-                  This task is {task.status}. Edit it to reopen.
-                </Text>
-              )}
+          {/* ── Actions ── */}
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>Actions</Text>
+            <View style={styles.actionRow}>
+              <ActionButton
+                label="Complete"
+                icon="✓"
+                color={colors.energy}
+                onPress={() => handleAction(() => onComplete(task.id))}
+                disabled={!isActionable}
+              />
+              <ActionButton
+                label="Delay"
+                icon="↷"
+                color={colors.momentum}
+                onPress={() => onRequestDelay(task)}
+                disabled={!isActionable}
+              />
+              <ActionButton
+                label="Skip"
+                icon="✕"
+                color={colors.stress}
+                onPress={() => handleAction(() => onSkip(task.id))}
+                disabled={!isActionable}
+              />
             </View>
 
-            {/* ── Delete ── */}
-            <TouchableOpacity onPress={() => setConfirmingDelete(true)} style={styles.deleteBtn}>
-              <Text style={styles.deleteBtnText}>Delete task</Text>
-            </TouchableOpacity>
+            {isFinished && (
+              <Text style={styles.finishedNote}>
+                This task is {task.status}. Edit it to reopen.
+              </Text>
+            )}
+          </View>
 
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
+          {/* ── Delete ── */}
+          <TouchableOpacity onPress={() => onRequestDelete(task)} style={styles.deleteBtn}>
+            <Text style={styles.deleteBtnText}>Delete task</Text>
+          </TouchableOpacity>
 
-      {/* Edit form — stacked on top */}
-      <TaskFormModal
-        visible={editOpen}
-        task={task}
-        selectedDate={task.startDateTime.split('T')[0]}
-        onClose={() => setEditOpen(false)}
-        onSave={(updated) => {
-          onUpdate(updated);
-          setEditOpen(false);
-        }}
-      />
-
-      <ConfirmDialog
-        visible={confirmingDelete}
-        title="Delete this task?"
-        message={`"${task.title}" will be removed permanently. This can't be undone.`}
-        confirmLabel="Delete"
-        onConfirm={confirmDelete}
-        onCancel={() => setConfirmingDelete(false)}
-      />
-    </>
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
   );
 }
 

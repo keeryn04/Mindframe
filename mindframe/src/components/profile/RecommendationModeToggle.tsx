@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
 import { RecommendationMode } from "../../types/UserPreferences.types";
-import { styles } from "../../styling/RecommendationModeToggle.styles";
+import { styles } from "../../styling/components/profile/RecommendationModeToggle.styles";
 
 interface Props {
   value: RecommendationMode;

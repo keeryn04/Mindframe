@@ -1,5 +1,5 @@
 import { View, Text } from "react-native";
-import { styles } from "../../styling/StateBar.styles";
+import { styles } from "../../styling/components/ui/StateBar.styles";
 import { colors } from "../../styling/theme";
 
 export function StateBar({
