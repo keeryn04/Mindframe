@@ -1,4 +1,4 @@
-// src/navigation/RootNavigator.tsx
+// src/navigators/RootNavigator.tsx
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useDatabase } from "../db/useDatabase";
@@ -7,6 +7,7 @@ import { LoadingScreen } from "../screens/LoadingScreen";
 import { ErrorScreen } from "../screens/ErrorScreen";
 import { BreakPromptModal } from "../components/breaks/BreakPromptModal";
 import { ROUTES } from "./routes";
+import { colors } from "../styling/theme";
 
 export type RootStackParamList = {
   [ROUTES.LOADING]: undefined;
@@ -34,7 +35,11 @@ export function RootNavigator() {
     <>
       <Stack.Navigator
         initialRouteName={initialRoute()}
-        screenOptions={{ headerShown: false, animation: "fade" }}
+        screenOptions={{
+          headerShown: false,
+          animation: "fade",
+          contentStyle: { backgroundColor: colors.bg },
+        }}
       >
         {!ready && !error && (
           <Stack.Screen name={ROUTES.LOADING} component={LoadingScreen} />

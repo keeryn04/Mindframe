@@ -44,24 +44,38 @@ export function toLocalDateString(date: Date): string {
 }
 
 function shortDayLabel(date: string): string {
+  const [y, m, d] = date.split("-").map(Number);
+
+  const localDate = new Date(y, m - 1, d);
+
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  return days[new Date(date).getDay()];
+  return days[localDate.getDay()];
 }
 
 function buildLast7Days(tasks: ScheduledTask[]): DailyCount[] {
   const counts: DailyCount[] = [];
+
   const today = new Date();
 
-  for (let i = TIMELINE_DAYS - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
+  // Start of current week (Sunday)
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+
     const date = toLocalDateString(d);
 
     const count = tasks.filter(
       (t) => isCompleted(t) && t.startDateTime.startsWith(date)
     ).length;
 
-    counts.push({ date: date, label: shortDayLabel(date), count });
+    counts.push({
+      date,
+      label: shortDayLabel(date),
+      count,
+    });
   }
 
   return counts;
@@ -140,8 +154,8 @@ function computeStreaks(tasks: ScheduledTask[]): {
   let run = 1;
 
   for (let i = 1; i < sorted.length; i++) {
-    const prev = new Date(sorted[i - 1]);
-    const curr = new Date(sorted[i]);
+    const prev = parseLocalDate(sorted[i - 1]);
+    const curr = parseLocalDate(sorted[i]);
     const diffDays =
       (prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24);
 
@@ -156,6 +170,11 @@ function computeStreaks(tasks: ScheduledTask[]): {
   longestStreak = Math.max(longestStreak, currentStreak, 1);
 
   return { currentStreak, longestStreak };
+}
+
+function parseLocalDate(date: string): Date {
+  const [y, m, d] = date.split("-").map(Number);
+  return new Date(y, m - 1, d);
 }
 
 // ── Hook ─────────────────────────────────────────────────────────────────────

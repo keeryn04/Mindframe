@@ -1,65 +1,53 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// stats/constants/statsTheme.ts
+// src/styling/statsTheme.ts
 //
-// All colours, labels, and display thresholds used across the Stats screen.
-// Changing a colour here propagates everywhere automatically.
+// Semantic color + label lookup tables for the Stats screen. Kept separate
+// from theme.ts because these map *domain keys* (stressLevel, completed,
+// high…) to tokens, rather than defining the tokens themselves.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { TaskPriority } from '../types/calendar/Calendar.types';
+import { colors } from "./theme";
 
-// ── Cognitive metric colours ─────────────────────────────────────────────────
-// Each metric has a single brand colour used in gauges and legends.
-// stress uses red because it is the "danger" signal; others are positive.
+export const TIMELINE_DAYS = 7;
+
 export const METRIC_COLORS = {
-  stressLevel: "#E24B4A",   // red   — high stress = bad
-  energyLevel: "#1D9E75",   // teal  — energy = vitality
-  focusLevel:  "#7F77DD",   // purple — focus = mental clarity
-  momentum:    "#BA7517",   // amber  — momentum = forward motion
-  confidence:  "#639922",   // green  — confidence = growth
+  stressLevel: colors.stress,
+  energyLevel: colors.energy,
+  focusLevel: colors.brand,
+  momentum: colors.momentum,
+  confidence: colors.confidence,
 } as const;
 
 export const METRIC_LABELS = {
   stressLevel: "Stress",
   energyLevel: "Energy",
-  focusLevel:  "Focus",
-  momentum:    "Momentum",
-  confidence:  "Confidence",
+  focusLevel: "Focus",
+  momentum: "Momentum",
+  confidence: "Confidence",
 } as const;
 
-// ── Task outcome colours ─────────────────────────────────────────────────────
 export const OUTCOME_COLORS = {
-  completed: "#1D9E75",   // teal
-  delayed:   "#BA7517",   // amber
-  skipped:   "#E24B4A",   // red
-  pending:   "#888780",   // gray
+  completed: colors.energy,
+  delayed: colors.momentum,
+  skipped: colors.stress,
+  pending: colors.borderStrong,
 } as const;
 
 export const OUTCOME_LABELS = {
   completed: "Completed",
-  delayed:   "Delayed",
-  skipped:   "Skipped",
-  pending:   "Pending",
+  delayed: "Delayed",
+  skipped: "Skipped",
+  pending: "Pending",
 } as const;
 
-// ── Priority colours ─────────────────────────────────────────────────────────
-export const PRIORITY_COLORS: Record<TaskPriority, string> = {
-  high:   "#E24B4A",
-  medium: "#BA7517",
-  low:    "#1D9E75",
-};
+export const PRIORITY_COLORS = {
+  high: colors.stress,
+  medium: colors.momentum,
+  low: colors.energy,
+} as const;
 
-export const PRIORITY_LABELS: Record<TaskPriority, string> = {
-  high:   "High",
+export const PRIORITY_LABELS = {
+  high: "High",
   medium: "Medium",
-  low:    "Low",
-};
-
-// ── Thresholds used by gauge colour-banding ──────────────────────────────────
-// stress is inverted — low stress is good.
-export const GAUGE_THRESHOLDS = {
-  stress: { warn: 50, danger: 75 },
-  positive: { warn: 40, ok: 65 },   // energy, focus, momentum, confidence
+  low: "Low",
 } as const;
-
-// ── Timeline ─────────────────────────────────────────────────────────────────
-export const TIMELINE_DAYS = 7;

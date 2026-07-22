@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { DatabaseProvider, useDb } from "../db/DatabaseContext";
 import { createUserStateRepo } from "../db/repositories/userStateRepo";
 import { useUserStateStore } from "../store/useUserStateStore";
@@ -8,6 +9,7 @@ import { createTaskRepo } from "../db/repositories/taskRepo";
 import { useTaskStore } from "../store/useTaskStore";
 import { useUserPreferencesStore } from "../store/useUserPreferencesStore";
 import { createUserPreferencesRepo } from "../db/repositories/userPreferencesRepo";
+import { navigationTheme } from "../styling/navigationTheme";
 
 interface Props {
   children: React.ReactNode;
@@ -39,7 +41,7 @@ function AppInitializer({ children }: Props) {
     initAll().catch((err) => {
       console.error("App initialization failed:", err);
     });
-  }, [db, ready]); 
+  }, [db, ready]);
 
   if (!ready || !allReady) {
     return null;
@@ -50,13 +52,15 @@ function AppInitializer({ children }: Props) {
 
 export function AppProviders({ children }: Props) {
   return (
-    <DatabaseProvider>
-      <AppInitializer>
-        <NavigationContainer>
-          <StatusBar style="auto" />
-          {children}
-        </NavigationContainer>
-      </AppInitializer>
-    </DatabaseProvider>
+    <SafeAreaProvider>
+      <DatabaseProvider>
+        <AppInitializer>
+          <NavigationContainer theme={navigationTheme}>
+            <StatusBar style="dark" />
+            {children}
+          </NavigationContainer>
+        </AppInitializer>
+      </DatabaseProvider>
+    </SafeAreaProvider>
   );
 }

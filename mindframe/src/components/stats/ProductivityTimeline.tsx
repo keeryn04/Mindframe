@@ -1,34 +1,29 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// stats/components/ProductivityTimeline.tsx
+// components/stats/ProductivityTimeline.tsx
 //
-// 7-day bar chart of tasks completed per calendar day.
-// Today's bar is highlighted in teal; past days use a muted variant.
-//
-// Uses react-native-gifted-charts (BarChart).
-//
-// Responsibilities:
-//   • Convert DailyCount[] into gifted-charts BarData[]
-//   • Highlight today
-//   • Handle the zero-data case
+// 7-day bar chart of tasks completed per calendar day. Today's bar is
+// highlighted; past days use a muted variant.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 import { DailyCount } from "../../types/stats/stats.types";
 import { toLocalDateString } from "../../utils/useStatsData";
+import { colors } from "../../styling/theme";
+import { EmptyState } from "../ui/EmptyState";
+import { styles } from "../../styling/components/stats/ProductivityTimeline.styles";
 
 interface Props {
-  days: DailyCount[];     // exactly 7 entries, oldest first
+  days: DailyCount[]; // exactly 7 entries, oldest first
 }
 
-const TODAY_COLOR = "#1D9E75";        // teal
-const PAST_COLOR  = "#9FE1CB";        // teal-100 (muted)
-const ZERO_COLOR  = "#D3D1C7";        // gray-100
+const TODAY_COLOR = colors.energy;
+const PAST_COLOR = "#9FE1CB";
+const ZERO_COLOR = colors.surfaceSunken;
 
 function buildBarData(days: DailyCount[]) {
   const today = toLocalDateString(new Date());
-  const maxCount = Math.max(...days.map((d) => d.count), 1);
 
   return days.map((day) => {
     const isToday = day.date === today;
@@ -36,18 +31,14 @@ function buildBarData(days: DailyCount[]) {
     return {
       value: day.count,
       label: day.label,
-      frontColor: isToday
-        ? TODAY_COLOR
-        : hasData
-        ? PAST_COLOR
-        : ZERO_COLOR,
+      frontColor: isToday ? TODAY_COLOR : hasData ? PAST_COLOR : ZERO_COLOR,
       topLabelComponent:
         day.count > 0
           ? () => (
               <Text
                 style={{
                   fontSize: 10,
-                  color: isToday ? TODAY_COLOR : "#5F5E5A",
+                  color: isToday ? TODAY_COLOR : colors.inkMuted,
                   fontWeight: "600",
                   marginBottom: 2,
                 }}
@@ -60,14 +51,6 @@ function buildBarData(days: DailyCount[]) {
   });
 }
 
-function EmptyState() {
-  return (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>No completions this week</Text>
-    </View>
-  );
-}
-
 export function ProductivityTimeline({ days }: Props) {
   const totalThisWeek = days.reduce((s, d) => s + d.count, 0);
   const barData = buildBarData(days);
@@ -75,7 +58,7 @@ export function ProductivityTimeline({ days }: Props) {
   return (
     <View style={styles.container}>
       {totalThisWeek === 0 ? (
-        <EmptyState />
+        <EmptyState glyph="▁" title="No completions this week" />
       ) : (
         <BarChart
           data={barData}
@@ -107,47 +90,3 @@ export function ProductivityTimeline({ days }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 12,
-  },
-  axisLabel: {
-    fontSize: 11,
-    color: "#888780",
-  },
-  footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  legendText: {
-    fontSize: 12,
-    color: "#888780",
-  },
-  total: {
-    marginLeft: "auto",
-    fontSize: 12,
-    color: "#5F5E5A",
-    fontWeight: "500",
-  },
-  emptyContainer: {
-    height: 80,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: 13,
-    color: "#888780",
-  },
-});

@@ -25,7 +25,7 @@ export interface TaskStore {
   removeTask: (id: string) => Promise<void>;
 
   completeTask: (id: string) => Promise<void>;
-  delayTask: (id: string) => Promise<void>;
+  delayTask: (id: string, newDate: string) => Promise<void>;
   skipTask: (id: string) => Promise<void>;
 }
 
@@ -45,7 +45,6 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
     const fullTasks = await repo.getAll();
 
-    //convert FullTask to ScheduledTask
     const tasks: ScheduledTask[] = fullTasks.map((t) => ({
       id: t.id,
       title: t.title,
@@ -117,11 +116,20 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     emitTaskEvent("TASK_COMPLETED", task);
   },
 
-  delayTask: async (id) => {
+  delayTask: async (id, newDate) => {
     const task = get().tasks.find((t) => t.id === id);
     if (!task) return;
 
-    const updated = { ...task, status: "delayed" as TaskStatus };
+    // Keep the same time-of-day and duration; only the calendar date moves.
+    const startTimePart = task.startDateTime.split('T')[1] ?? '00:00:00';
+    const endTimePart = task.endDateTime.split('T')[1] ?? '00:00:00';
+
+    const updated = {
+      ...task,
+      startDateTime: `${newDate}T${startTimePart}`,
+      endDateTime: `${newDate}T${endTimePart}`,
+      status: "delayed" as TaskStatus,
+    };
 
     set((state) => ({
       tasks: state.tasks.map((t) =>
@@ -220,5 +228,3 @@ function emitTaskEvent(
 
   dispatch(event);
 }
-
-
