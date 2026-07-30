@@ -28,34 +28,10 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: spacing.lg,
   },
-  fieldLabel: {
-    ...type.caption,
-    color: colors.inkFaint,
-    textTransform: "uppercase",
-    marginBottom: spacing.sm,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-    fontSize: 15,
-    color: colors.ink,
-    backgroundColor: colors.surfaceAlt,
-  },
-  inputError: {
-    borderColor: colors.stress,
-  },
-  errorText: {
-    fontSize: 12,
-    color: colors.stress,
-    marginTop: 6,
-  },
   actions: {
     flexDirection: "row",
     gap: spacing.sm,
-    marginTop: spacing.lg,
+    marginTop: spacing.sm,
   },
   actionItem: {
     flex: 1,

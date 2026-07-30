@@ -1,12 +1,8 @@
 import { ScheduledTask } from "../types/Task.types";
 
-// ─── Date construction ────────────────────────────────────────────────────────
-
-/** Returns the Date objects for each day of the 6×7 month grid.
- *  Includes padding days from adjacent months so the grid is always 42 cells. */
 export function getMonthGrid(year: number, month: number): Date[] {
   const firstOfMonth = new Date(year, month, 1);
-  const startPadding = firstOfMonth.getDay(); // 0 = Sunday
+  const startPadding = firstOfMonth.getDay();
 
   const cells: Date[] = [];
   for (let i = 0; i < 42; i++) {
@@ -15,7 +11,6 @@ export function getMonthGrid(year: number, month: number): Date[] {
   return cells;
 }
 
-/** Returns the 7 Date objects for the week containing the given date (Sun–Sat). */
 export function getWeekDays(date: Date): Date[] {
   const sunday = new Date(date);
   sunday.setDate(date.getDate() - date.getDay());
@@ -26,9 +21,6 @@ export function getWeekDays(date: Date): Date[] {
   });
 }
 
-// ─── Task filtering ───────────────────────────────────────────────────────────
-
-/** True when a task overlaps the given calendar day. */
 function taskOccursOnDay(task: ScheduledTask, date: Date): boolean {
   const taskStart = new Date(task.startDateTime);
   const taskEnd = new Date(task.endDateTime);
@@ -40,11 +32,9 @@ function taskOccursOnDay(task: ScheduledTask, date: Date): boolean {
 }
 
 export function getTasksForDay(tasks: ScheduledTask[], date: string) {
-
-  return tasks.filter((t) => {
-    const taskDate = t.startDateTime.split("T")[0];
-    return taskDate === date;
-  });
+  return tasks.filter(
+    (t) => t.startDateTime.split('T')[0] === date
+  );
 }
 
 export function getTasksForWeek(tasks: ScheduledTask[], weekDate: Date): ScheduledTask[] {
@@ -62,16 +52,11 @@ export function getTasksForWeek(tasks: ScheduledTask[], weekDate: Date): Schedul
   });
 }
 
-// ─── Week view positioning ────────────────────────────────────────────────────
-
-/** Converts a datetime string to a fractional hour offset from startHour.
- *  e.g. "2024-01-15T09:30:00" with startHour=8 → 1.5 */
 export function dateTimeToHourOffset(dateTime: string, startHour: number): number {
   const d = new Date(dateTime);
   return (d.getHours() + d.getMinutes() / 60) - startHour;
 }
 
-/** CSS top% for a task block within the visible hour range. Clamped to [0, 100]. */
 export function getTaskTopPercent(
   startDateTime: string,
   visibleStartHour: number,
@@ -81,7 +66,6 @@ export function getTaskTopPercent(
   return Math.max(0, Math.min(100, (offset / visibleHours) * 100));
 }
 
-/** CSS height% for a task block. Minimum 2% so sub-15-min tasks stay visible. */
 export function getTaskHeightPercent(
   startDateTime: string,
   endDateTime: string,
@@ -92,8 +76,6 @@ export function getTaskHeightPercent(
   const durationHours = (end.getTime() - start.getTime()) / 3_600_000;
   return Math.max(2, (durationHours / visibleHours) * 100);
 }
-
-// ─── Date comparison helpers ──────────────────────────────────────────────────
 
 export function isSameDay(a: Date, b: Date): boolean {
   return (
@@ -113,8 +95,6 @@ export function isPastDay(date: Date): boolean {
   const dateStart  = new Date(date.getFullYear(),  date.getMonth(),  date.getDate());
   return dateStart < todayStart;
 }
-
-// ─── Formatting ───────────────────────────────────────────────────────────────
 
 const DAY_NAMES  = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 const MONTH_NAMES = [
@@ -151,7 +131,30 @@ export function formatDateString(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-/** "9:00 AM" from a datetime string */
+/**
+ * Inverse of formatDateString. Built from local Y/M/D components rather
+ * than `new Date("YYYY-MM-DD")`, which JS parses as UTC midnight and can
+ * silently shift a day in negative UTC-offset timezones.
+ */
+export function dateStringToLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1);
+}
+
+/** Combines a "YYYY-MM-DD" date and "HH:MM" time into one local Date. */
+export function timeStringToLocalDate(dateStr: string, timeStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const [h, min] = timeStr.split(":").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1, h ?? 0, min ?? 0);
+}
+
+/** "HH:MM" (24h, zero-padded) from a Date — the inverse of timeStringToLocalDate. */
+export function dateToTimeString(date: Date): string {
+  const h = String(date.getHours()).padStart(2, "0");
+  const m = String(date.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
 export function formatTime(dateTime: string): string {
   const d = new Date(dateTime);
   const h = d.getHours();
@@ -162,14 +165,11 @@ export function formatTime(dateTime: string): string {
   return `${hour}:${min} ${suffix}`;
 }
 
-/** "9 AM" — shorter label for the time gutter */
 export function formatHourLabel(hour: number): string {
   if (hour === 0)  return "12 AM";
   if (hour === 12) return "12 PM";
   return hour < 12 ? `${hour} AM` : `${hour - 12} PM`;
 }
-
-// ─── Navigation helpers ───────────────────────────────────────────────────────
 
 export function addMonths(year: number, month: number, delta: number): { year: number; month: number } {
   const d = new Date(year, month + delta, 1);
@@ -183,6 +183,5 @@ export function addWeeks(date: Date, delta: number): Date {
 }
 
 export function parseDateString(s: string): Date {
-  const [year, month, day] = s.split("-").map(Number);
-  return new Date(year, month - 1, day);
+  return new Date(s);
 }

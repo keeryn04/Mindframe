@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Pressable, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, Text, View } from "react-native";
 import { Button } from "../ui/Button";
-import { colors } from "../../styling/theme";
+import { DateTimeField } from "../ui/DateTimeField";
+import { dateStringToLocalDate, formatDateString } from "../../utils/calendarUtils";
 import { styles } from "../../styling/components/calendar/DelayTaskDialog.styles";
 
 interface DelayTaskDialogProps {
@@ -13,11 +14,6 @@ interface DelayTaskDialogProps {
   onCancel: () => void;
 }
 
-function isValidDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  return !Number.isNaN(new Date(`${value}T00:00:00`).getTime());
-}
-
 export function DelayTaskDialog({
   visible,
   taskTitle,
@@ -25,24 +21,16 @@ export function DelayTaskDialog({
   onConfirm,
   onCancel,
 }: DelayTaskDialogProps) {
-  const [date, setDate] = useState(initialDate ?? "");
-  const [error, setError] = useState<string | null>(null);
+  const [date, setDate] = useState<Date>(() =>
+    dateStringToLocalDate(initialDate ?? formatDateString(new Date()))
+  );
 
   // Re-seed the field whenever a new task is targeted for delay.
   useEffect(() => {
     if (visible) {
-      setDate(initialDate ?? "");
-      setError(null);
+      setDate(dateStringToLocalDate(initialDate ?? formatDateString(new Date())));
     }
   }, [visible, initialDate]);
-
-  function handleConfirm() {
-    if (!isValidDate(date)) {
-      setError("Enter a valid date as YYYY-MM-DD");
-      return;
-    }
-    onConfirm(date);
-  }
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
@@ -55,27 +43,14 @@ export function DelayTaskDialog({
             </Text>
           ) : null}
 
-          <Text style={styles.fieldLabel}>New date</Text>
-          <TextInput
-            style={[styles.input, error && styles.inputError]}
-            value={date}
-            onChangeText={(v) => {
-              setDate(v);
-              if (error) setError(null);
-            }}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={colors.inkFaint}
-            keyboardType="numbers-and-punctuation"
-            autoFocus
-          />
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          <DateTimeField label="New date" mode="date" value={date} onChange={setDate} />
 
           <View style={styles.actions}>
             <View style={styles.actionItem}>
               <Button label="Cancel" variant="secondary" onPress={onCancel} />
             </View>
             <View style={styles.actionItem}>
-              <Button label="Delay" variant="primary" onPress={handleConfirm} />
+              <Button label="Delay" variant="primary" onPress={() => onConfirm(formatDateString(date))} />
             </View>
           </View>
         </Pressable>

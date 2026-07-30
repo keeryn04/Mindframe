@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { ScheduledTask } from '../../types/Task.types';
 import { TaskPriority, TaskStatus } from '../../types/calendar/Calendar.types';
+import { dateStringToLocalDate, dateToTimeString, formatDateString, timeStringToLocalDate } from '../../utils/calendarUtils';
+import { DateTimeField } from '../ui/DateTimeField';
 import { colors } from '../../styling/theme';
 import { styles } from '../../styling/components/calendar/TaskFormModal.styles';
 
@@ -154,17 +156,7 @@ export function TaskFormModal({
     const next: typeof errors = {};
     if (!form.title.trim())
       next.title = 'Title is required';
-    if (!form.date.match(/^\d{4}-\d{2}-\d{2}$/))
-      next.date = 'Use format YYYY-MM-DD';
-    if (!form.startTime.match(/^\d{2}:\d{2}$/))
-      next.startTime = 'Use format HH:MM';
-    if (!form.endTime.match(/^\d{2}:\d{2}$/))
-      next.endTime = 'Use format HH:MM';
-    if (
-      !next.startTime &&
-      !next.endTime &&
-      !isEndAfterStart(form.date, form.startTime, form.endTime)
-    )
+    if (!isEndAfterStart(form.date, form.startTime, form.endTime))
       next.endTime = 'End must be after start';
 
     setErrors(next);
@@ -235,43 +227,32 @@ export function TaskFormModal({
             </Field>
 
             {/* ── Date ── */}
-            <Field label="Date" error={errors.date}>
-              <TextInput
-                style={[styles.input, errors.date && styles.inputError]}
-                value={form.date}
-                onChangeText={(v) => set('date', v)}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={colors.inkFaint}
-                keyboardType="numbers-and-punctuation"
-              />
-            </Field>
+            <DateTimeField
+              label="Date"
+              mode="date"
+              value={dateStringToLocalDate(form.date)}
+              onChange={(d) => set('date', formatDateString(d))}
+            />
 
             {/* ── Time row ── */}
             <View style={styles.row}>
               <View style={{ flex: 1 }}>
-                <Field label="Start" error={errors.startTime}>
-                  <TextInput
-                    style={[styles.input, errors.startTime && styles.inputError]}
-                    value={form.startTime}
-                    onChangeText={(v) => set('startTime', v)}
-                    placeholder="09:00"
-                    placeholderTextColor={colors.inkFaint}
-                    keyboardType="numbers-and-punctuation"
-                  />
-                </Field>
+                <DateTimeField
+                  label="Start"
+                  mode="time"
+                  value={timeStringToLocalDate(form.date, form.startTime)}
+                  onChange={(d) => set('startTime', dateToTimeString(d))}
+                />
               </View>
               <Text style={styles.timeSep}>–</Text>
               <View style={{ flex: 1 }}>
-                <Field label="End" error={errors.endTime}>
-                  <TextInput
-                    style={[styles.input, errors.endTime && styles.inputError]}
-                    value={form.endTime}
-                    onChangeText={(v) => set('endTime', v)}
-                    placeholder="10:00"
-                    placeholderTextColor={colors.inkFaint}
-                    keyboardType="numbers-and-punctuation"
-                  />
-                </Field>
+                <DateTimeField
+                  label="End"
+                  mode="time"
+                  value={timeStringToLocalDate(form.date, form.endTime)}
+                  onChange={(d) => set('endTime', dateToTimeString(d))}
+                  error={errors.endTime}
+                />
               </View>
             </View>
 
