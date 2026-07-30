@@ -168,6 +168,10 @@ export function TaskFormModal({
   const handleSave = () => {
     if (!validate()) return;
 
+    // Editing a task that was already finished should flip it back to in_progress.
+    const wasFinished = task?.status === 'complete' || task?.status === 'skipped';
+    const nextStatus = !task || wasFinished ? DEFAULT_STATUS : task.status;
+
     const saved: ScheduledTask = {
       id:            task?.id ?? generateId(),
       title:         form.title.trim(),
@@ -175,7 +179,7 @@ export function TaskFormModal({
       endDateTime:   buildDateTime(form.date, form.endTime),
       priority:      form.priority,
       color:         form.color,
-      status:        task?.status ?? DEFAULT_STATUS,
+      status:        nextStatus,
       subtasks:      form.subtasks.length > 0 ? form.subtasks : undefined,
       isRecommended: task?.isRecommended ?? false,
     };

@@ -76,8 +76,8 @@ export function BreakSheet({ onClose }: BreakSheetProps) {
             duration: 200,
             useNativeDriver: true,
           }).start(() => {
-            translateY.setValue(0);
             onClose();
+            translateY.setValue(0);
           });
         } else {
           Animated.spring(translateY, {

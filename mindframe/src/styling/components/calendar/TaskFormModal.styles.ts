@@ -69,7 +69,7 @@ export const styles = StyleSheet.create({
   timeSep: {
     fontSize: 18,
     color: colors.inkFaint,
-    paddingBottom: 10,
+    paddingBottom: 35,
   },
   chipRow: {
     flexDirection: 'row',

@@ -142,7 +142,7 @@ export function Calendar() {
               {item.title}
             </Text>
 
-            {item.status === 'in_progress' ? (
+            {item.status === 'in_progress' || item.status === 'delayed' ? (
               <View style={styles.actionsRow}>
                 <TouchableOpacity onPress={() => completeTask(item.id)} style={styles.action} hitSlop={HIT_SLOP}>
                   <Text style={styles.complete}>✓</Text>

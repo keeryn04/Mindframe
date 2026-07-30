@@ -124,7 +124,7 @@ export function TaskDetailModal({
   if (!task) return null;
 
   const statusCfg = STATUS_CONFIG[task.status];
-  const isActionable = task.status === 'in_progress';
+  const isActionable = task.status === 'in_progress' || task.status === 'delayed';
   const isFinished   = task.status === 'complete' || task.status === 'skipped';
 
   const handleAction = (action: () => void) => {
