@@ -24,12 +24,12 @@ function AppInitializer({ children }: Props) {
   const [allReady, setAllReady] = useState(false);
 
   useEffect(() => {
-    if (!db || !ready) return;
+    if (!ready) return;
 
     async function initAll() {
-      const userRepo = createUserStateRepo(db);
-      const taskRepo = createTaskRepo(db);
-      const preferencesRepo = createUserPreferencesRepo(db);
+      const userRepo = createUserStateRepo(db as any);
+      const taskRepo = createTaskRepo(db as any);
+      const preferencesRepo = createUserPreferencesRepo(db as any);
 
       await initializeUserStore(userRepo);
       await initializeTaskStore(taskRepo);
