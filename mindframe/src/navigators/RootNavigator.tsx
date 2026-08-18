@@ -28,10 +28,6 @@ export function RootNavigator() {
   };
 
   return (
-    // BreakPromptModal is a sibling of the Stack.Navigator, not a screen
-    // inside it — React Native's <Modal> already renders as a top-level
-    // overlay, so this lets the prompt appear over any screen (including
-    // the Breaks screen itself, where it should just stay hidden).
     <>
       <Stack.Navigator
         initialRouteName={initialRoute()}

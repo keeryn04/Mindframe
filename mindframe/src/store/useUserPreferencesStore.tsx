@@ -17,8 +17,16 @@ export const useUserPreferencesStore = create<UserPreferencesStore>((set, get) =
 
   initialize: async (repo) => {
     repoRef = repo;
-    const saved = await repo.load();
-    set({ preferences: saved, isHydrated: true });
+
+    try {
+      const saved = await repo.load();
+      set({ preferences: saved, isHydrated: true });
+    } catch (e) {
+      // Fall back to defaults rather than leaving ProfileScreen stuck on
+      // its loading state if the saved preferences can't be read.
+      console.error("useUserPreferencesStore: failed to load preferences", e);
+      set({ preferences: { ...defaultPreferences }, isHydrated: true });
+    }
   },
 
   updatePreferences: async (patch) => {
@@ -26,7 +34,13 @@ export const useUserPreferencesStore = create<UserPreferencesStore>((set, get) =
     set({ preferences: merged });
 
     if (repoRef) {
-      await repoRef.save(merged);
+      try {
+        await repoRef.save(merged);
+      } catch (e) {
+        // Preferences already updated in memory; log rather than throw so
+        // a storage hiccup can't crash the settings screen.
+        console.error("useUserPreferencesStore: failed to save preferences", e);
+      }
     }
   },
 }));

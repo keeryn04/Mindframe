@@ -1,5 +1,5 @@
-import React, { useMemo, useRef, useState } from "react";
-import { Animated, PanResponder, ScrollView, Text, View } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Animated, Dimensions, PanResponder, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { breakActivities, BreakActivity } from "../../types/breaks/BreakActivity.types";
 import { BreakActivityCategory } from "../../types/AppEvent.types";
@@ -15,6 +15,8 @@ import { styles } from "../../styling/components/breaks/BreakSheet.styles";
 type CategoryFilter = "all" | BreakActivityCategory;
 
 const ALL_CATEGORIES: BreakActivityCategory[] = ["breathing", "movement", "mindfulness", "social", "rest"];
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface BreakSheetProps {
   onClose: () => void;
@@ -55,12 +57,16 @@ export function BreakSheet({ onClose }: BreakSheetProps) {
   const [active, setActive] = useState<BreakActivity | null>(null);
   const [filter, setFilter] = useState<CategoryFilter>("all");
 
-  // Drag-to-dismiss: the handle is the only pan-responder target, so
-  // scrolling the activity list below it is unaffected. Dragging past
-  // DISMISS_THRESHOLD and releasing closes the sheet; otherwise it
-  // springs back to rest.
-  const translateY = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const DISMISS_THRESHOLD = 120;
+
+  useEffect(() => {
+    Animated.spring(translateY, {
+      toValue: 0,
+      useNativeDriver: true,
+      bounciness: 4,
+    }).start();
+  }, []);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -72,12 +78,11 @@ export function BreakSheet({ onClose }: BreakSheetProps) {
       onPanResponderRelease: (_, gesture) => {
         if (gesture.dy > DISMISS_THRESHOLD) {
           Animated.timing(translateY, {
-            toValue: 800,
+            toValue: SCREEN_HEIGHT,
             duration: 200,
             useNativeDriver: true,
           }).start(() => {
             onClose();
-            translateY.setValue(0);
           });
         } else {
           Animated.spring(translateY, {

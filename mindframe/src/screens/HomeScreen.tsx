@@ -36,7 +36,7 @@ function RecommendationBanner({ rec }: { rec: Recommendation }) {
           )}
         </View>
         <Text style={[banner.headline, { color: s.accent }]}>{rec.headline}</Text>
-        <Text style={banner.detail} numberOfLines={2}>{rec.detail}</Text>
+        <Text style={banner.detail} numberOfLines={3}>{rec.detail}</Text>
       </View>
     </View>
   );
@@ -77,7 +77,7 @@ export function HomeScreen() {
       <BreakMiniBar emphasis={emphasis} onPress={openModal} />
 
       {/* Expanded break sheet — takes over the full screen when opened */}
-      <Modal visible={modalVisible} animationType="slide" onRequestClose={closeModal}>
+      <Modal visible={modalVisible} transparent animationType="none" onRequestClose={closeModal}>
         <BreakSheet onClose={closeModal} />
       </Modal>
     </SafeAreaView>

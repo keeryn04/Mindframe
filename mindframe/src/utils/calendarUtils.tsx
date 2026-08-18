@@ -21,16 +21,6 @@ export function getWeekDays(date: Date): Date[] {
   });
 }
 
-function taskOccursOnDay(task: ScheduledTask, date: Date): boolean {
-  const taskStart = new Date(task.startDateTime);
-  const taskEnd = new Date(task.endDateTime);
-
-  const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
-  const dayEnd   = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
-
-  return taskStart <= dayEnd && taskEnd >= dayStart;
-}
-
 export function getTasksForDay(tasks: ScheduledTask[], date: string) {
   return tasks.filter(
     (t) => t.startDateTime.split('T')[0] === date

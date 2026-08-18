@@ -1,8 +1,10 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, FlatList, Platform } from 'react-native';
 import {
   CalendarProvider,
   ExpandableCalendar,
+  WeekCalendar,
+  CalendarList,
 } from 'react-native-calendars';
 import { useTaskStore } from '../../store/useTaskStore';
 import { getTasksForDay } from '../../utils/calendarUtils';
@@ -100,13 +102,74 @@ export function Calendar() {
     [tasks, selectedDate, filter]
   );
 
+  const changeWeek = (direction: 'prev' | 'next') => {
+    const current = new Date(selectedDate);
+
+    current.setDate(
+      current.getDate() + (direction === 'next' ? 7 : -7)
+    );
+
+    setSelectedDate(current.toISOString().split('T')[0]);
+  };
+
+  const weekLabel = useMemo(() => {
+    const date = new Date(selectedDate);
+
+    const start = new Date(date);
+    start.setDate(date.getDate() - date.getDay());
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+
+    return `${start.toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+    })} - ${end.toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+    })}`;
+  }, [selectedDate]);
+
   return (
     <CalendarProvider date={selectedDate} onDateChanged={(date) => setSelectedDate(date)}>
-      <ExpandableCalendar
-        markingType="multi-dot"
-        markedDates={markedDates}
-        theme={calendarTheme}
-      />
+      {Platform.OS === 'web' ? (
+        <>
+          <View style={styles.weekNav}>
+            <TouchableOpacity
+              onPress={() => changeWeek('prev')}
+              style={styles.weekArrow}
+            >
+              <Text style={styles.weekArrowText}>‹</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.weekLabel}>{weekLabel}</Text>
+
+            <TouchableOpacity
+              onPress={() => changeWeek('next')}
+              style={styles.weekArrow}
+            >
+              <Text style={styles.weekArrowText}>›</Text>
+            </TouchableOpacity>
+          </View>
+
+          <WeekCalendar
+            current={selectedDate}
+            markedDates={markedDates}
+            theme={calendarTheme}
+            onDayPress={(day) => setSelectedDate(day.dateString)}
+          />
+        </>
+      ) : (
+        <ExpandableCalendar
+          markingType="multi-dot"
+          markedDates={markedDates}
+          theme={calendarTheme}
+          pastScrollRange={12}
+          futureScrollRange={12}
+          initialNumToRender={3}
+          calendarHeight={360}
+        />
+      )}
 
       <View style={styles.toolbar}>
         <View style={styles.filterWrap}>

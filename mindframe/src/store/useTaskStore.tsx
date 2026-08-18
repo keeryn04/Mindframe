@@ -43,21 +43,30 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   initialize: async (repo) => {
     repoRef = repo;
 
-    const fullTasks = await repo.getAll();
+    try {
+      const fullTasks = await repo.getAll();
 
-    const tasks: ScheduledTask[] = fullTasks.map((t) => ({
-      id: t.id,
-      title: t.title,
-      startDateTime: t.startDateTime,
-      endDateTime: t.endDateTime,
-      color: t.color,
-      priority: t.priority,
-      status: t.status,
-      subtasks: t.subtasks,
-      isRecommended: t.isRecommended,
-    }));
+      const tasks: ScheduledTask[] = fullTasks.map((t) => ({
+        id: t.id,
+        title: t.title,
+        startDateTime: t.startDateTime,
+        endDateTime: t.endDateTime,
+        color: t.color,
+        priority: t.priority,
+        status: t.status,
+        subtasks: t.subtasks,
+        isRecommended: t.isRecommended,
+      }));
 
-    set({ tasks, isHydrated: true });
+      set({ tasks, isHydrated: true });
+    } catch (e) {
+      // Loading existing tasks failed (corrupted storage, disk issue, etc).
+      // Fall back to an empty task list rather than leaving the app stuck
+      // on a permanent loading state — the user can still use the app and
+      // new tasks will persist normally going forward.
+      console.error("useTaskStore: failed to load tasks", e);
+      set({ tasks: [], isHydrated: true });
+    }
   },
 
   addTask: async (task) => {
@@ -94,7 +103,11 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     }));
 
     if (repoRef) {
-      await repoRef.delete(id);
+      try {
+        await repoRef.delete(id);
+      } catch (e) {
+        console.error("useTaskStore: failed to delete task", e);
+      }
     }
 
     emitTaskEvent("TASK_DELETED", existing);
@@ -212,7 +225,15 @@ async function persistTask(task: ScheduledTask) {
     isRepeat: false,
   };
 
-  await repoRef.upsert(full);
+  try {
+    await repoRef.upsert(full);
+  } catch (e) {
+    // The in-memory task list already reflects the change (optimistic
+    // update above) so the UI stays responsive; we log rather than throw
+    // so a storage hiccup can't take down the whole app. The write will
+    // simply be retried the next time this task is touched.
+    console.error("useTaskStore: failed to persist task", task.id, e);
+  }
 }
 
 function emitTaskEvent(

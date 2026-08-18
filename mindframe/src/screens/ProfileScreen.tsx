@@ -35,6 +35,16 @@ export function ProfileScreen() {
     setLocalName(preferences.displayName);
   }, [isHydrated]);
 
+  // Clear any in-flight debounce/toast timers on unmount so they can't fire
+  // setState calls after this screen has gone away (e.g. user changes a
+  // preference then immediately switches tabs).
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    };
+  }, []);
+
   const handleChange = useCallback(
     (patch: Partial<UserPreferences>) => {
       setSaveStatus("saving");

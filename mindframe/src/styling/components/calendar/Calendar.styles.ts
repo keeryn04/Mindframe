@@ -32,6 +32,28 @@ export const styles = StyleSheet.create({
   filterWrap: {
     flex: 1,
   },
+  weekNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+
+  weekArrow: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+
+  weekArrowText: {
+    fontSize: 22,
+    fontWeight: '600',
+  },
+
+  weekLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
   addBtn: {
     paddingVertical: 10,
     paddingHorizontal: spacing.base,

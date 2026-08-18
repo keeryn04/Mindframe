@@ -33,14 +33,26 @@ export const useUserStateStore = create<UserStateStore>((set, get) => ({
   initialize: async (repo) => {
     repoRef = repo;
 
-    const savedState = await repo.load();
-    const preferences = useUserPreferencesStore.getState().preferences;
+    try {
+      const savedState = await repo.load();
+      const preferences = useUserPreferencesStore.getState().preferences;
 
-    set({
-      state: savedState,
-      recommendations: getRecommendations(savedState, preferences),
-      isHydrated: true,
-    });
+      set({
+        state: savedState,
+        recommendations: getRecommendations(savedState, preferences),
+        isHydrated: true,
+      });
+    } catch (e) {
+      // Fall back to initialState rather than leaving the app stuck on a
+      // permanent loading screen if the saved state can't be read.
+      console.error("useUserStateStore: failed to load state", e);
+      const preferences = useUserPreferencesStore.getState().preferences;
+      set({
+        state: initialState,
+        recommendations: getRecommendations(initialState, preferences),
+        isHydrated: true,
+      });
+    }
   },
 
   dispatch: async (event) => {
@@ -59,7 +71,14 @@ export const useUserStateStore = create<UserStateStore>((set, get) => ({
     });
 
     if (repoRef) {
-      await repoRef.save(nextState);
+      try {
+        await repoRef.save(nextState);
+      } catch (e) {
+        // State already updated in memory; a failed save just means this
+        // particular change won't survive an app restart. Log and move on
+        // instead of throwing an unhandled rejection.
+        console.error("useUserStateStore: failed to save state", e);
+      }
     }
   },
 }));
