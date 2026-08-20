@@ -1,5 +1,5 @@
 
-# Mindframe — Product Overview
+# Welcome to Mindframe!
 
 ## 1. What Mindframe is
 
